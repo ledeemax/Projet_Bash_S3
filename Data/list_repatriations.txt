@@ -1,0 +1,2 @@
+1:/NCBI/Genomes/:ftp.ncbi.nih.gov/genomes/Drosophiles_melanogaster/chr1.gz
+2:/NCBI/Human_Genomic/:ftp.ebi.ac.uk/genomes/Drosophiles_melanogaster/chr1.gz
