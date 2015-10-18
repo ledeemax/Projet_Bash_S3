@@ -21,6 +21,7 @@ VERSION=1
 AUTHORS="Stéphanie LEVON & Maxime LEDEE"
 ORGANISATION="Master Degree Bioinformatics - Rouen University"
 
+
 #################################
 #    Functions
 #################################

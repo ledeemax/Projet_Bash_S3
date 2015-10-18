@@ -21,6 +21,7 @@ VERSION=1
 AUTHORS="Stéphanie LEVON & Maxime LEDEE"
 ORGANISATION="Master Degree Bioinformatics - Rouen University"
 
+
 #################################
 #    Functions
 #################################
@@ -30,11 +31,6 @@ function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	fileListUsers=${DIR}"/../Data/list_users.txt"
-	# TODO :
-	# fileTexModel=
-	# fileHtmlModem=
-	# dirData=
-	# ... ?
 }
 
 # Display the menu. 3 choices are available.
@@ -48,16 +44,15 @@ function listUsers {
 }
 
 # Delete one or many user(s) in Data/list_users.txt
-# http://www.commentcamarche.net/faq/4839-sed-supprimer-une-ou-plusieurs-lignes-d-un-fichier
 function delUser {
-	# Afficher uniquement la premiere colonne du fichier Data/list_users.txt :  cut -f 1 -d":" $fileListUsers`
-	sep="|"
+	echo "delUser function called"
+	local sep="|"
 	listUsersToDel=`zenity --list --checklist --separator=${sep} --text="Select user(s) to delete :" --width=500 --height=300\
 			--column="" --column="Utilisateurs" \
 			$(sed s/^/FALSE\ / ${fileListUsers})`
 	for user in `echo $listUsersToDel | tr ${sep} " "`
 	do
-		echo "Suppression de l'utilisateur : ${user}"
+		echo "Removing of user : ${user}"
 		sed -i "/${user}/d" ${fileListUsers}
 	done
 }
@@ -66,7 +61,6 @@ function delUser {
 function addUser {
 	echo "addUser function called"
 }
-
 
 
 ########################
