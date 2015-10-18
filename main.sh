@@ -30,6 +30,9 @@ ORGANISATION="Master Degree Bioinformatics - Rouen University"
 function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
+	scriptGestionUsers=${DIR}"/Bin/gestion_users.sh"
+	scriptGestionRepatriements=${DIR}"/Bin/gestion_repatriements.sh"
+	scriptGestionStrategies=${DIR}"/Bin/gestion_strategies.sh"
 	# TODO :
 	# fileTexModel=
 	# fileHtmlModem=
@@ -50,15 +53,15 @@ function displayMainMenu {
 	case $choice in
 		1)
 			echo "Choice 1 selected : Gestion de la liste des utilisateurs (./Bin/gestion_users.sh executed)"
-			exec ./Bin/gestion_users.sh
+			exec ${scriptGestionUsers}
 			;;
 		2)
 			echo "Choice 2 selected : Gestion de la liste des rapatriements (./Bin/gestion_repatriements.sh executed)"
-			exec ./Bin/gestion_repatriements.sh
+			exec ${scriptGestionRepatriements}
 			;;
 		3)
 			echo "Choice 3 selected : Gestion de la liste des stratégies (./Bin/gestion_strategies.sh executed)"
-			exec ./Bin/gestion_strategies.sh
+			exec ${scriptGestionStrategies}
 			;;
 		4)
 			echo "Choice 4 selected : Génération d'un rapport (displayMenuGenerationReport function called)"
@@ -123,9 +126,7 @@ function setLog {
 #    Main
 #################################
 
-# TODO :
-# init
-
+init
 if [ $# -lt 1 ]			# less then / est plus petit que
 then
 	echo "Displaying the main menu"
@@ -134,15 +135,15 @@ else
 	case $1 in
 		1 | "--users")
 			echo "Gestion de la liste des utilisateurs (call of ./Bin/gestion_users.sh script)"
-			exec ./Bin/gestion_users.sh
+			exec ${scriptGestionUsers}
 			;;
 		2 | "--repatriements")
 			echo "Gestion de la liste des rapatriements (call of ./Bin/gestion_repatriements.sh script)"
-			exec ./Bin/gestion_repatriements.sh
+			exec ${scriptGestionRepatriements}
 			;;
 		3 | "--strategies")
 			echo "Gestion de la liste des stratégies (call of ./Bin/gestion_strategies.sh script)"
-			exec ./Bin/gestion_strategies.sh
+			exec ${scriptGestionStrategies}
 			;;
 		4 | "--report")
 			echo "Génération d'un rapport (call of displayMenuGenerationReport function)"

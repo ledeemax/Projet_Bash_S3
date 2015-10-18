@@ -31,6 +31,7 @@ function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
+	scriptMain=${DIR}"/../main.sh"
 }
 
 # Display the menu. 3 choices are available.
@@ -85,17 +86,19 @@ function addStrategie {
 # TODO : modify the syntax of the task
 # Argument : TODO
 function addCron {
-	crontab -l > mycron
-	echo "39 12 * * * ./main.sh --getData 1" >> mycron
-	crontab mycron
-	rm mycron
+	echo "addCron function called"
+	#crontab -l > mycron
+	# TODO : use ${scriptMain} variable
+	#echo "39 12 * * * ./main.sh --getData 1" >> mycron
+	#crontab mycron
+	#rm mycron
 	# TODO : modify the main.sh file. Add a new case in main.
 }
 
 # Delete a cron in crontab file
 # Argument : TODO
 function delCron {
-
+	echo "delCron function called"
 }
 
 
