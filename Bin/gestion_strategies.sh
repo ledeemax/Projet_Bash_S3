@@ -4,94 +4,135 @@
 # Fichier 		: gestion_strategies.sh
 # Auteur 		: ledee.maxime@gmail.com, steph.levon@wanadoo.fr
 # But du fichier 	:  
-# Exécution 		: ./gestion_strategies.sh
+# Exécution 		: ./gestion_strategies.sh [--list] [--add]  [--del]
 # ************************************************************************************
 
-########################
-#    Initialisation
-########################
-USAGE="USAGE : $0 [--add] [--list] [--del]"  # TODO : a remplir
-sourceFile=../Data/list_users.txt
+#################################
+#    Initialisation (CONSTANTES)
+#################################
+USAGE="Usage:\
+\t $0 \n\
+\t $0 [1] [--list] [-l] \n\
+\t $0 [2] [--add] [-a] \n\
+\t $0 [3] [--del] [-d] \n\
+\t $0 [--help] [-h] \n\
+\t $0 [--version] [-v]"
+VERSION=1
+AUTHORS="Stéphanie LEVON & Maxime LEDEE"
+ORGANISATION="Master Degree Bioinformatics - Rouen University"
 
-########################
+
+#################################
 #    Functions
-########################
+#################################
 
+# Initialisation of variables
+function init {
+	echo "init function called"
+	DIR="$( cd "$( dirname "${0}" )" && pwd )"
+	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
+}
+
+# Display the menu. 3 choices are available.
 function displayMenu {
-
+	echo "displayMenu function called"
 }
 
-function list {
-
+# List the strategies contained in Data/list_strategies.txt file
+function listStrategies {
+	echo "listStrategies function called"
 }
 
-function del {
-
+# Delete one or many strategie(s) in Data/list_strategies.txt
+function delStrategies {
+	echo "delStrategies function called"
+	local sep="|"
+	listStrategiesToDel=`zenity --list --checklist --separator=${sep} --text="Select strategie(s) to delete :" --width=500 --height=300\
+			--column="" --column="Strategies" \
+			$(sed s/^/FALSE\ / ${fileListStrategies})`
+	for strategie in `echo $listStrategiesToDel | tr ${sep} " "`
+	do
+		echo "Removing of strategie : ${strategie}"
+		sed -i "/${strategie}/d" ${fileListStrategies}
+		# TODO : call delCron function with argument.
+	done
 }
 
-function add {
-	if "journaliere"
-		set "00 04 * * *"
-	if "hebdomadaire"
-		set "00 04 6 * *"
-	if "mensuel"
-		set "00 ..."
-	if "tous les 12"
-		set
-	if "annuelle"
-		set ...
-
-	grep annuelle list_periodiciies.txt | cut 
-
-	task=1:1:1:00 12 * * *:y
+# Add one strategie in Data/list_strategies.txt
+function addStrategie {
+	echo "addStrategie function called"
+	#if "journaliere"
+	#	set "00 04 * * *"
+	#if "hebdomadaire"
+	#	set "00 04 6 * *"
+	#if "mensuel"
+	#	set "00 ..."
+	#if "tous les 12"
+	#	set
+	#if "annuelle"
+	#	set ...
+	#
+	#grep annuelle list_periodiciies.txt | cut 
+	#
+	#task=1:1:1:00 12 * * *:y
 	#task=00 12 * * *
-	task >> list_stategies.txt
-	addCron task
-
+	#task >> list_stategies.txt
+	#addCron task
+	# TODO : call addCron function with argument.
 }
 
-function addCron{
-
+# Add a cron in crontab file
+# TODO : modify the syntax of the task
+# Argument : TODO
+function addCron {
 	crontab -l > mycron
 	echo "39 12 * * * ./main.sh --getData 1" >> mycron
 	crontab mycron
 	rm mycron
+	# TODO : modify the main.sh file. Add a new case in main.
 }
 
-dans crontab :
-30 12 * * * ./main.sh 1
-
-
+# Delete a cron in crontab file
+# Argument : TODO
 function delCron {
 
 }
+
 
 ########################
 #    Main 
 ########################
 
-#if [ $# -eq 0 ]
-if [ $# -lt 1 ]			# less then / est plus petit que
+init
+if [ $# -lt 1 ]
 then
-	echo $USAGE
-	exit 1
+	echo "Displaying the Strategie Management menu"
+	displayMenu
 else
-	echo "$# argument(s) trouvé(s)"
-	case $# in
-		--getData)
-			getData($1)
-			echo "Exécution du script TP_exo02.sh"
-			exec ./TP_exo02.sh $*
+	case $1 in
+		1 | "--list" | "-l")
+			echo "List of strategies (call of listStrategies function)"
+			listStrategies
 			;;
-		2)
-			echo "Exécution du script TP_exo03.sh"
-			exec ./TP_exo03.sh $*
+		2 | "--add" | "-a")
+			echo "Add a strategie (call of addStrategie function)"
+			addStrategie
 			;;
-		3)
-			echo "Exécution du script TP_exo04.sh"
-			exec ./TP_exo04.sh $*
+		3 | "--del" | "-d")
+			echo "Delete a strategie (call of delStrategie function)"
+			addStrategie
+			;;
+		"-h" | "--help")
+			echo -e ${USAGE}
+			exit 1
+			;;
+		"-v" | "--version")
+			echo -e "VERSION: ${VERSION}\nAUTHORS: ${AUTHORS}\nORGANISATION: ${ORGANISATION}"
+			exit 1
 			;;
 		*)
-			echo "Erreur"
+			echo -e "Invalid argument.\n${USAGE}"
+			exit 1
+			;;
 	esac
 fi
