@@ -45,7 +45,7 @@ function listStrategies {
 }
 
 # Delete one or many strategie(s) in Data/list_strategies.txt
-function delStrategies {
+function delStrategie {
 	echo "delStrategies function called"
 	local sep="|"
 	listStrategiesToDel=`zenity --list --checklist --separator=${sep} --text="Select strategie(s) to delete :" --width=500 --height=300\
@@ -123,7 +123,7 @@ else
 			;;
 		3 | "--del" | "-d")
 			echo "Delete a strategie (call of delStrategie function)"
-			addStrategie
+			delStrategie
 			;;
 		"-h" | "--help")
 			echo -e ${USAGE}
