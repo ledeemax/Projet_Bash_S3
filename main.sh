@@ -25,6 +25,7 @@ ORGANISATION="Master Degree Bioinformatics - Rouen University"
 #    Functions
 #################################
 
+# Display the main menu. 4 choices are available.
 function displayMainMenu {
 	chx=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=207 --column="Choice" --column="Description" \
 1 "Gérer la liste des utilisateurs" \
@@ -55,16 +56,21 @@ function displayMainMenu {
 	esac
 }
 
+# Display the menu to generate a report based on a user and/or a period.
 function displayMenuGeneratedReport {
-	echo "coucou"
+	echo "displayMenuGeneratedReport function called"
 }
 
-function createReport {
-	echo "coucou"
+# Generate a report based on a user and/or a period.
+# Arguments: a user, a period (the beginning and the end), a type of report (website, document or slide).
+# TODO: generate a model (html or tex).
+function generateReport {
+	echo "generateReport function called"
 }
 
+# Download file.
 function getData {
-	echo "coucou"
+	echo "getData function called"
 #	id_rapat=grep $1 list_strategies.txt | cut f=3
 #	isLoged=grep $1 list_strategies.txt | cut f=5
 #	destinationDir=grep $id_rapat list_rapatriement.txt | cut f=2
@@ -88,13 +94,14 @@ function getData {
 #	}
 }
 
-
+# Check if file to download is not already present in local repertory..
 function checkLastFile {
-	echo "coucou"
+	echo "checkLastFile function called"
 }
 
+# Generate/update a log file.
 function setLog {
-	echo "coucou"
+	echo "setLog function called"
 }
 
 
