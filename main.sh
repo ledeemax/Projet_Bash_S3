@@ -1,11 +1,11 @@
 #! /bin/bash
 
-# ************************************************************************************
+# ****************************************************************************************
 # Fichier 		: main.sh
 # Auteur 		: ledee.maxime@gmail.com, steph.levon@wanadoo.fr
 # But du fichier 	:  
-# Exécution 		: ./main.sh [--users] [--repatriements] [--strategies] [--report]
-# ************************************************************************************
+# Exécution 		: ./main.sh [--users] [--repatriations] [--strategies] [--report]
+# ****************************************************************************************
 
 #################################
 #    Initialisation (CONSTANTES)
@@ -13,7 +13,7 @@
 USAGE="Usage:\
 \t $0 \n\
 \t $0 [1] [--users] \n\
-\t $0 [2] [--repatriements] \n\
+\t $0 [2] [--repatriations] \n\
 \t $0 [3] [--strategies] \n\
 \t $0 [4] [--report] \n\
 \t $0 [--help] [-h]"
@@ -31,7 +31,7 @@ function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	scriptGestionUsers=${DIR}"/Bin/gestion_users.sh"
-	scriptGestionRepatriements=${DIR}"/Bin/gestion_repatriements.sh"
+	scriptGestionRepatriations=${DIR}"/Bin/gestion_repatriations.sh"
 	scriptGestionStrategies=${DIR}"/Bin/gestion_strategies.sh"
 	# TODO :
 	# fileTexModel=
@@ -56,8 +56,8 @@ function displayMainMenu {
 			exec ${scriptGestionUsers}
 			;;
 		2)
-			echo "Choice 2 selected : Gestion de la liste des rapatriements (./Bin/gestion_repatriements.sh executed)"
-			exec ${scriptGestionRepatriements}
+			echo "Choice 2 selected : Gestion de la liste des rapatriements (./Bin/gestion_repatriations.sh executed)"
+			exec ${scriptGestionRepatriations}
 			;;
 		3)
 			echo "Choice 3 selected : Gestion de la liste des stratégies (./Bin/gestion_strategies.sh executed)"
@@ -137,9 +137,9 @@ else
 			echo "Gestion de la liste des utilisateurs (call of ./Bin/gestion_users.sh script)"
 			exec ${scriptGestionUsers}
 			;;
-		2 | "--repatriements")
-			echo "Gestion de la liste des rapatriements (call of ./Bin/gestion_repatriements.sh script)"
-			exec ${scriptGestionRepatriements}
+		2 | "--repatriations")
+			echo "Gestion de la liste des rapatriements (call of ./Bin/gestion_repatriations.sh script)"
+			exec ${scriptGestionRepatriations}
 			;;
 		3 | "--strategies")
 			echo "Gestion de la liste des stratégies (call of ./Bin/gestion_strategies.sh script)"
