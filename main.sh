@@ -43,7 +43,7 @@ function init {
 # Display the main menu. 4 choices are available.
 function displayMainMenu {
 	echo "displayMainMenu function called"
-	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=207 \
+	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=210 \
 		--column="" --column="Description" \
 		1 "Gérer la liste des utilisateurs" \
 		2 "Gérer la liste des rapatriements" \
