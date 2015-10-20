@@ -116,7 +116,6 @@ function addCron {
 	echo "${periodCron} ${scriptMain} --get-data ${newIdStrategy}"
 	crontab mycron.tmp
 	rm -f mycron.tmp
-	# TODO : modify the main.sh file. Add a new case in main.
 }
 
 # Delete a cron in crontab file

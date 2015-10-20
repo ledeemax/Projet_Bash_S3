@@ -88,6 +88,7 @@ function generateReport {
 # Download file.
 function getData {
 	echo "getData function called"
+	local idStrategy=$1
 #	id_rapat=grep $1 list_strategies.txt | cut f=3
 #	isLoged=grep $1 list_strategies.txt | cut f=5
 #	destinationDir=grep $id_rapat list_rapatriement.txt | cut f=2
@@ -149,6 +150,20 @@ else
 			echo "Génération d'un rapport (call of displayMenuGenerationReport function)"
 			displayMenuGenerationReport
 			;;
+		"--get-data")
+			if [ -z "$2" ]
+			then
+				echo "ERROR lors du rapatriement d'un fichier : missing argument"
+				exit 1
+			elif ! [[ "$2" =~ ^[0-9]+$ ]]
+			then
+				echo "ERROR lors du rapatriement d'un fichier : second parameter ($2) must be a number"
+				exit 1
+			else
+				echo "Rapatriement d'un fichier (call of getData function)"
+				getData $2
+			fi
+			;;
 		"-h" | "--help")
 			echo -e ${USAGE}
 			exit 1
@@ -158,7 +173,7 @@ else
 			exit 1
 			;;
 		*)
-			echo -e "Invalid argument.\n${USAGE}"
+			echo -e "ERROR: Invalid argument.\n${USAGE}"
 			exit 1
 			;;
 	esac
