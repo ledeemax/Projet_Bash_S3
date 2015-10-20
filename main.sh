@@ -45,10 +45,10 @@ function displayMainMenu {
 	echo "displayMainMenu function called"
 	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=210 \
 		--column="" --column="Description" \
-		1 "Gérer la liste des utilisateurs" \
-		2 "Gérer la liste des rapatriements" \
-		3 "Gérer la liste des stratégies" \
-		4 "Générer un rapport"`
+		1 "Manage the list of users" \
+		2 "Manage the list of repatriations" \
+		3 "Manage the list of strategies" \
+		4 "Generate a report"`
 
 	case $choice in
 		1)
