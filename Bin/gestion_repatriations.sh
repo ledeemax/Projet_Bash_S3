@@ -36,11 +36,64 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
+	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=207 \
+		--column="" --column="Description" \
+		1 "Display the list of all repatriations" \
+		2 "Add a repatriation" \
+		3 "Delete a repatriation"`
+		
+		case $choice in
+		1)
+			echo "Choice 1 selected : Display the list of all repatriations"
+			listRepatriations
+			;;
+		2)
+			echo "Choice 2 selected : Add a repatriation"
+			addRepatriation
+			;;
+		3)
+			echo "Choice 3 selected : Delete repatriation(s)"
+			delRepatriation
+			;;
+
+		*)
+			echo "Canceled"
+			;;
+	esac
 }
 
 # List the repatriations contained in Data/list_repatriations.txt file
 function listRepatriations {
 	echo "listRepatriations function called"
+	id=$(cat $fileListRepatriations | cut -d : -f 1) 
+	folder=$(cat $fileListRepatriations | cut -d : -f 2) 
+	file_adress=$(cat $fileListRepatriations | cut -d : -f 3)
+	yad --list --center --text="Display repatriation" --width=600 --height=300\
+			--column="Id" $id --column="Destination folder" $folder --column="File link" $file_adress \
+			--button=Return
+	
+	echo "Return to Menu"
+	displayMenu
+}
+
+# Add one repatriation in Data/list_repatriations.txt
+function addRepatriation {
+	echo "addRepatriation function called"
+	newRepatriation=`yad --width=400 --title="" --center --text="Please enter your details:" --separator=":" \
+		--form \
+		--field="Destination folder" \
+		--field="File adress"`
+	getNewId
+	newDestinationFolder=`echo $newRepatriation | cut -d : -f 1`
+	newFileAdress=`echo $newRepatriation | cut -d : -f 2`
+	echo "$newId:$newDestinationFolder:$newFileAdress" >> $fileListRepatriations 
+	echo "New Repatriation add"
+	../main.sh
+}
+
+function getNewId {
+	lastId=$(cat $fileListRepatriations | cut -d : -f 1 | sort -nr | head -n 1 )
+	newId=$(($lastId+1))
 }
 
 # Delete one or many repatriation(s) in Data/list_repatriations.txt
@@ -54,11 +107,6 @@ function delRepatriation {
 		echo "Removing of repatriation : ${repatriation}"
 		sed -i "\?${repatriation}?d" ${fileListRepatriations}
 	done
-}
-
-# Add one repatriation in Data/list_repatriations.txt
-function addRepatriation {
-	echo "addRepatriation function called"
 }
 
 

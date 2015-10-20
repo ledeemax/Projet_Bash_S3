@@ -69,8 +69,11 @@ function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom
 	#echo $numero
 	user=$(cut -d : -f 2- $fileListUsers)
 	#echo $user
-	listUsers=`yad --list --separator=${sep} --text="Display users" --width=600 --height=300\
-			--column="Users" $user`
+	yad --list --separator=${sep} --button=Return --center --text="Display users" --width=600 --height=300\
+			--column="Users" $user
+	
+	echo "Return to Menu"
+	displayMenu
 }
 
 # Add one user in Data/list_users.txt
@@ -86,6 +89,7 @@ function addUser {
 	firstName=`echo $newUser | cut -d : -f 2`
 	email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
 	echo "$newId:$lastName:$firstName:email" >> $fileListUsers 
+	../main.sh
 }
 
 function getNewId {
