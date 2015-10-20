@@ -79,7 +79,7 @@ function addStrategy {
 		--field="Select user :":CB \
 		--field="Select source file :":CB \
 		--field="Select periodicity :":CB \
-		--field="To log ?":CB \
+		--field="will be logged ?":CB \
 		"${listUsers}" "${listRepatriations}" "${listPeriodicities}"  "yes,no"`
 
 	if [ "${strategyToAdd}" == "" ]
@@ -90,17 +90,17 @@ function addStrategy {
 		idRepatriation=$(echo $(echo ${strategyToAdd} | cut -f 2 -d"|") | cut -f 1 -d":")
 		periodName=$(echo ${strategyToAdd} | cut -f 3 -d"|")
 		periodCron=`grep ${periodName} ${fileListPeriodicities} | cut -f 2 -d":"`
-		toLog=$(echo ${strategyToAdd} | cut -f 4 -d"|")
+		isToLog=$(echo ${strategyToAdd} | cut -f 4 -d"|")
 		echo "idUser = ${idUser}"
 		echo "idRepatriation = ${idRepatriation}"
 		echo "periodName = ${periodName}"
-		echo "toLog = ${toLog}"
+		echo "isToLog = ${isToLog}"
 		echo "periodCron = ${periodCron}"
 
 		getNewId
 		echo "newIdStrategy = $newIdStrategy"
 
-		strategyToAdd="${newIdStrategy}:${idUser}:${idRepatriation}:${periodName}:${toLog}"
+		strategyToAdd="${newIdStrategy}:${idUser}:${idRepatriation}:${periodName}:${isToLog}"
 		echo "Updating of Data/list_strategies.txt file"
 		chmod +w ${fileListStrategies}
 		echo ${strategyToAdd} >> ${fileListStrategies}
