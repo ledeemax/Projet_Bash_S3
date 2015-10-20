@@ -31,6 +31,7 @@ function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	fileListRepatriations=${DIR}"/../Data/list_repatriations.txt"
+	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
 }
 
 # Display the menu. 3 choices are available.
@@ -99,13 +100,21 @@ function getNewId {
 # Delete one or many repatriation(s) in Data/list_repatriations.txt
 function delRepatriation {
 	echo "delRepatriation function called"
-	listRepatriationsToDel=`zenity --list --checklist --separator=" " --text="Select repatriation(s) to delete :" --width=500 --height=300\
+	local listRepatriationsToDel=`zenity --list --checklist --separator=" " --text="Select repatriation(s) to delete :" --width=500 --height=300\
 			--column="" --column="Repatriations" \
 			$(sed s/^/FALSE\ / ${fileListRepatriations})`
 	for repatriation in `echo $listRepatriationsToDel`
 	do
-		echo "Removing of repatriation : ${repatriation}"
-		sed -i "\?${repatriation}?d" ${fileListRepatriations}
+		local idRepatriation=`echo ${repatriation} | cut -f 1 -d":"`
+		if [ "$(cut -f 3 -d":" ${fileListStrategies} | grep ${idRepatriation})" ]
+		then
+			zenity --warning --width=500 --height=50 \
+				--text "ID repatriation's is used in list strategies's. Please remove the strategy containing the repatriation ID's (${idRepatriation}), then come back here to remove it"
+		else
+			echo "Removing of repatriation : ${repatriation}"
+			sed -i "\?${repatriation}?d" ${fileListRepatriations}
+			chmod +w ${fileListRepatriations}
+		fi
 	done
 }
 

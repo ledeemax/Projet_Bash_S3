@@ -79,28 +79,33 @@ function addStrategy {
 		--field="Select user :":CB \
 		--field="Select source file :":CB \
 		--field="Select periodicity :":CB \
-		--field="To log ?":CB \
+		--field="will be logged ?":CB \
 		"${listUsers}" "${listRepatriations}" "${listPeriodicities}"  "yes,no"`
 
-	idUser=$(echo $(echo ${strategyToAdd} | cut -f 1 -d"|") | cut -f 1 -d":")
-	idRepatriation=$(echo $(echo ${strategyToAdd} | cut -f 2 -d"|") | cut -f 1 -d":")
-	periodName=$(echo ${strategyToAdd} | cut -f 3 -d"|")
-	periodCron=`grep ${periodName} ${fileListPeriodicities} | cut -f 2 -d":"`
-	toLog=$(echo ${strategyToAdd} | cut -f 4 -d"|")
-	echo "idUser = ${idUser}"
-	echo "idRepatriation = ${idRepatriation}"
-	echo "periodName = ${periodName}"
-	echo "toLog = ${toLog}"
-	echo "periodCron = ${periodCron}"
+	if [ "${strategyToAdd}" == "" ]
+	then
+		echo "Cancelling to add a strategy"
+	else
+		idUser=$(echo $(echo ${strategyToAdd} | cut -f 1 -d"|") | cut -f 1 -d":")
+		idRepatriation=$(echo $(echo ${strategyToAdd} | cut -f 2 -d"|") | cut -f 1 -d":")
+		periodName=$(echo ${strategyToAdd} | cut -f 3 -d"|")
+		periodCron=`grep ${periodName} ${fileListPeriodicities} | cut -f 2 -d":"`
+		isToLog=$(echo ${strategyToAdd} | cut -f 4 -d"|")
+		echo "idUser = ${idUser}"
+		echo "idRepatriation = ${idRepatriation}"
+		echo "periodName = ${periodName}"
+		echo "isToLog = ${isToLog}"
+		echo "periodCron = ${periodCron}"
 
-	getNewId
-	echo "newIdStrategy = $newIdStrategy"
-	
-	strategyToAdd="${newIdStrategy}:${idUser}:${idRepatriation}:${periodName}:${toLog}"
-	echo "Updating of Data/list_strategies.txt file"
-	chmod +w ${fileListStrategies}
-	echo ${strategyToAdd} >> ${fileListStrategies}
-	addCron
+		getNewId
+		echo "newIdStrategy = $newIdStrategy"
+
+		strategyToAdd="${newIdStrategy}:${idUser}:${idRepatriation}:${periodName}:${isToLog}"
+		echo "Updating of Data/list_strategies.txt file"
+		chmod +w ${fileListStrategies}
+		echo ${strategyToAdd} >> ${fileListStrategies}
+		addCron
+	fi
 }
 
 # Add a cron in crontab file
@@ -111,7 +116,6 @@ function addCron {
 	echo "${periodCron} ${scriptMain} --get-data ${newIdStrategy}"
 	crontab mycron.tmp
 	rm -f mycron.tmp
-	# TODO : modify the main.sh file. Add a new case in main.
 }
 
 # Delete a cron in crontab file

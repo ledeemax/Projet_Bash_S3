@@ -31,6 +31,7 @@ function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	fileListUsers=${DIR}"/../Data/list_users.txt"
+	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
 }
 
 # Display the menu. 3 choices are available.
@@ -100,14 +101,21 @@ function getNewId {
 # Delete one or many user(s) in Data/list_users.txt
 function delUser {
 	echo "delUser function called"
-	local sep="|"
-	listUsersToDel=`zenity --list --checklist --separator=${sep} --text="Select user(s) to delete :" --width=500 --height=300\
+	local listUsersToDel=`zenity --list --checklist --separator=" " --text="Select user(s) to delete :" --width=500 --height=300\
 			--column="" --column="Utilisateurs" \
 			$(sed s/^/FALSE\ / ${fileListUsers})`
-	for user in `echo $listUsersToDel | tr ${sep} " "`
+	for user in `echo $listUsersToDel`
 	do
-		echo "Removing of user : ${user}"
-		sed -i "/${user}/d" ${fileListUsers}
+		local idUser=`echo ${user} | cut -f 1 -d":"`
+		if [ "$(cut -f 2 -d":" ${fileListStrategies} | grep ${idUser})" ]
+		then
+			zenity --warning --width=500 --height=50 \
+				--text "ID user's is used in list strategies's. Please remove the strategy containing the user ID's (${idUser}), then come back here to remove it"
+		else
+			echo "Removing of user : ${user}"
+			sed -i "/${user}/d" ${fileListUsers}
+			chmod +w ${fileListUsers}
+		fi
 	done
 }
 
