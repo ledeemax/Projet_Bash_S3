@@ -96,11 +96,10 @@ function getNewId {
 # Delete one or many user(s) in Data/list_users.txt
 function delUser {
 	echo "delUser function called"
-	local sep="|"
-	listUsersToDel=`zenity --list --checklist --separator=${sep} --text="Select user(s) to delete :" --width=500 --height=300\
+	listUsersToDel=`zenity --list --checklist --separator=" " --text="Select user(s) to delete :" --width=500 --height=300\
 			--column="" --column="Utilisateurs" \
 			$(sed s/^/FALSE\ / ${fileListUsers})`
-	for user in `echo $listUsersToDel | tr ${sep} " "`
+	for user in `echo $listUsersToDel`
 	do
 		echo "Removing of user : ${user}"
 		sed -i "/${user}/d" ${fileListUsers}
