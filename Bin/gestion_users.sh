@@ -36,30 +36,78 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
+	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=207 \
+		--column="" --column="Description" \
+		1 "Display the list of all users" \
+		2 "Add a user" \
+		3 "Delete a user"`
+		
+	case $choice in
+		1)
+			echo "Choice 1 selected : Display the list of all users"
+			listUsers
+			;;
+		2)
+			echo "Choice 2 selected : Add a user"
+			addUser
+			;;
+		3)
+			echo "Choice 3 selected : Delete user(s)"
+			delUser
+			;;
+
+		*)
+			echo "Canceled"
+			;;
+	esac
 }
 
 # List the users contained in Data/list_users.txt file
-function listUsers {
+function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom - Prenom - mail
 	echo "listUsers function called"
+	#numero=$(cut -c1 $fileListUsers)
+	#echo $numero
+	user=$(cut -d : -f 2- $fileListUsers)
+	#echo $user
+	listUsers=`yad --list --separator=${sep} --text="Display users" --width=600 --height=300\
+			--column="Users" $user`
+}
+
+# Add one user in Data/list_users.txt
+function addUser {
+	echo "addUser function called"
+	newUser=`yad --width=400 --title="" --text="Please enter your details:" --separator=":" \
+		--form \
+		--field="Last name" \
+		--field="First name" \
+		--field="email adresse"`
+	getNewId
+	lastName=`echo $newUser | cut -d : -f 1 | tr [a-z] [A-Z]`
+	firstName=`echo $newUser | cut -d : -f 2`
+	email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
+	echo "$newId:$lastName:$firstName:email" >> $fileListUsers 
+}
+
+function getNewId {
+	lastId=$(cat $fileListUsers | cut -d : -f 1 | sort -nr | head -n 1 )
+	newId=$(($lastId+1))
 }
 
 # Delete one or many user(s) in Data/list_users.txt
 function delUser {
 	echo "delUser function called"
-	listUsersToDel=`zenity --list --checklist --separator=" " --text="Select user(s) to delete :" --width=500 --height=300\
+	local sep="|"
+	listUsersToDel=`zenity --list --checklist --separator=${sep} --text="Select user(s) to delete :" --width=500 --height=300\
 			--column="" --column="Utilisateurs" \
 			$(sed s/^/FALSE\ / ${fileListUsers})`
-	for user in `echo $listUsersToDel`
+	for user in `echo $listUsersToDel | tr ${sep} " "`
 	do
 		echo "Removing of user : ${user}"
 		sed -i "/${user}/d" ${fileListUsers}
 	done
 }
 
-# Add one user in Data/list_users.txt
-function addUser {
-	echo "addUser function called"
-}
+
 
 
 ########################
