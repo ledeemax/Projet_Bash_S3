@@ -33,6 +33,9 @@ function init {
 	scriptGestionUsers=${DIR}"/Bin/gestion_users.sh"
 	scriptGestionRepatriations=${DIR}"/Bin/gestion_repatriations.sh"
 	scriptGestionStrategies=${DIR}"/Bin/gestion_strategies.sh"
+	fileListStrategies=${DIR}"/Data/list_strategies.txt"
+	fileListUsers=${DIR}"/Data/list_users.txt"
+	fileListRepatriations=${DIR}"/Data/list_repatriations.txt"
 	# TODO :
 	# fileTexModel=
 	# fileHtmlModem=
@@ -85,15 +88,49 @@ function generateReport {
 	echo "generateReport function called"
 }
 
-# Download file.
+# Perform the repatriation
+# Argument: Strategy ID's
+# TODO: plusieurs facons pour vérifier et tester un rapatriement
+#			1/	ftp .... << BYEBYE
+#					newer
+#				BYEBYE
+#			2/  rsync
+#			3/	mirror.pl
 function getData {
 	echo "getData function called"
+	
 	local idStrategy=$1
-#	id_rapat=grep $1 list_strategies.txt | cut f=3
-#	isLoged=grep $1 list_strategies.txt | cut f=5
-#	destinationDir=grep $id_rapat list_rapatriement.txt | cut f=2
-#	sourceFil=
-#
+	local strategyLine=`grep ^${idStrategy}: ${fileListStrategies}`
+	if [ -z "${strategyLine}" ]
+	then
+		echo "ERROR: Strategy ID's does not exist"
+		exit 1
+	fi
+	local idUser=`echo ${strategyLine} | cut -f 2 -d":"`
+	local idRepatriation=`echo ${strategyLine} | cut -f 3 -d":"`
+	local periodicity=`echo ${strategyLine} | cut -f 4 -d":"`
+	local isToLog=`echo ${strategyLine} | cut -f 5 -d":"`
+	
+	local repatriationLine=`grep ^${idRepatriation}: ${fileListRepatriations}`
+	local destRepatriation=`echo ${repatriationLine} | cut -f 2 -d":"`
+	local sourceRepatriation=`echo ${repatriationLine} | cut -f 3 -d":"`
+	
+	local userLine=`grep ^${idUser}: ${fileListUsers}`
+	local lastNameUser=`echo ${userLine} | cut -f 2 -d":"`
+	local firstNameUser=`echo ${userLine} | cut -f 3 -d":"`
+	local mailUser=`echo ${userLine} | cut -f 4 -d":"`
+	
+	echo -e "\t idStrategy : $idStrategy"
+	echo -e "\t idUser : $idUser"
+	echo -e "\t idRepatriation : $idRepatriation"
+	echo -e "\t periodicity : $periodicity"
+	echo -e "\t isToLog : $isToLog"
+	echo -e "\t destRepatriation : $destRepatriation"
+	echo -e "\t sourceRepatriation : $sourceRepatriation"
+	echo -e "\t lastNameUser : $lastNameUser"
+	echo -e "\t firstNameUser : $firstNameUser"
+	echo -e "\t mailUser : $mailUser"
+
 #	isRecent= checkFileIsRecent()
 #
 #	if (! isRecent)
