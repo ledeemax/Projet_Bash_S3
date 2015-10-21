@@ -70,7 +70,7 @@ function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom
 	#echo $numero
 	user=$(cut -d : -f 2- $fileListUsers)
 	#echo $user
-	yad --list --separator=${sep} --button=Return --center --text="Display users" --width=600 --height=300\
+	yad --center --list --separator=${sep} --button=Return  --text="Display users" --width=600 --height=300\
 			--column="Users" $user
 	
 	echo "Return to Menu"
@@ -80,7 +80,7 @@ function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom
 # Add one user in Data/list_users.txt
 function addUser {
 	echo "addUser function called"
-	newUser=`yad --width=400 --title="" --text="Please enter your details:" --separator=":" \
+	newUser=`yad --center --width=400 --title="" --text="Please enter your details:" --separator=":" \
 		--form \
 		--field="Last name" \
 		--field="First name" \
@@ -117,6 +117,7 @@ function delUser {
 			chmod +w ${fileListUsers}
 		fi
 	done
+	../main.sh
 }
 
 
