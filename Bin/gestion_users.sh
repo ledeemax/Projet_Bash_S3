@@ -37,11 +37,12 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=207 \
+	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=215 \
 		--column="" --column="Description" \
 		1 "Display the list of all users" \
 		2 "Add a user" \
-		3 "Delete a user"`
+		3 "Delete a user"\
+		4 "Back to Main Menu"`
 		
 	case $choice in
 		1)
@@ -56,6 +57,10 @@ function displayMenu {
 			echo "Choice 3 selected : Delete user(s)"
 			delUser
 			;;
+		4)
+			echo "Choice 4 selected : Back to Main Menu"
+			../main.sh 
+			;;
 
 		*)
 			echo "Canceled"
@@ -63,13 +68,10 @@ function displayMenu {
 	esac
 }
 
-# List the users contained in Data/list_users.txt file
+# List the users contained in ../Data/list_users.txt file
 function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom - Prenom - mail
 	echo "listUsers function called"
-	#numero=$(cut -c1 $fileListUsers)
-	#echo $numero
-	user=$(cut -d : -f 2- $fileListUsers)
-	#echo $user
+	user=$(cut -d : -f 2- $fileListUsers) # User file without Id
 	yad --center --list --separator=${sep} --button=Return  --text="Display users" --width=600 --height=300\
 			--column="Users" $user
 	
@@ -79,6 +81,7 @@ function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom
 
 # Add one user in Data/list_users.txt
 function addUser {
+	chmod +w $fileListUsers
 	echo "addUser function called"
 	newUser=`yad --center --width=400 --title="" --text="Please enter your details:" --separator=":" \
 		--form \
@@ -86,10 +89,11 @@ function addUser {
 		--field="First name" \
 		--field="email adresse"`
 	getNewId
-	lastName=`echo $newUser | cut -d : -f 1 | tr [a-z] [A-Z]`
+	lastName=`echo $newUser | sed "s/ /_/" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
 	firstName=`echo $newUser | cut -d : -f 2`
 	email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
-	echo "$newId:$lastName:$firstName:email" >> $fileListUsers 
+	echo "$newId:$lastName:$firstName:$email" >> $fileListUsers # Ajoute le nouvel utilisateur au fichier Utilisateur
+	yad --center --width=400 --title="What next?" --text "You can now add a repatriation or a strategy :) " 
 	../main.sh
 }
 
@@ -117,7 +121,7 @@ function delUser {
 			chmod +w ${fileListUsers}
 		fi
 	done
-	../main.sh
+	displayMenu
 }
 
 
