@@ -32,6 +32,7 @@ function init {
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	fileListUsers=${DIR}"/../Data/list_users.txt"
 	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
+	scriptMain=${DIR}"/../main.sh"
 }
 
 # Display the menu. 3 choices are available.
@@ -86,11 +87,14 @@ function addUser {
 		--field="First name" \
 		--field="email adresse"`
 	getNewId
-	lastName=`echo $newUser | cut -d : -f 1 | tr [a-z] [A-Z]`
-	firstName=`echo $newUser | cut -d : -f 2`
-	email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
-	echo "$newId:$lastName:$firstName:email" >> $fileListUsers 
-	../main.sh
+	if ! [ -z "$2" ]
+	then
+		lastName=`echo $newUser | cut -d : -f 1 | tr [a-z] [A-Z]`
+		firstName=`echo $newUser | cut -d : -f 2`
+		email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
+		echo "$newId:$lastName:$firstName:email" >> $fileListUsers
+	fi
+	exec ${scriptMain}
 }
 
 function getNewId {
