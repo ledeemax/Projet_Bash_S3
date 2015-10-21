@@ -32,6 +32,7 @@ function init {
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
 	fileListUsers=${DIR}"/../Data/list_users.txt"
 	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
+	scriptMain=${DIR}"/../main.sh"
 }
 
 # Display the menu. 3 choices are available.
@@ -89,12 +90,17 @@ function addUser {
 		--field="First name" \
 		--field="email adresse"`
 	getNewId
-	lastName=`echo $newUser | sed "s/ /_/" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
-	firstName=`echo $newUser | cut -d : -f 2`
-	email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
-	echo "$newId:$lastName:$firstName:$email" >> $fileListUsers # Ajoute le nouvel utilisateur au fichier Utilisateur
-	yad --center --width=400 --title="What next?" --text "You can now add a repatriation or a strategy :) " 
-	../main.sh
+	if ! [ -z "$newUser" ]
+	then
+		lastName=`echo $newUser | sed "s/ /_/" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
+		firstName=`echo $newUser | cut -d : -f 2`
+		email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
+		echo "$newId:$lastName:$firstName:$email" >> $fileListUsers # Ajoute le nouvel utilisateur au fichier Utilisateur
+		yad --center --width=400 --title="What next?" --text "You can now add a repatriation or a strategy :) " 
+		exec ${scriptMain}
+	else
+		displayMenu
+	fi
 }
 
 function getNewId {
