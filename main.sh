@@ -51,7 +51,11 @@ function displayMainMenu {
 		1 "Manage users" \
 		2 "Manage repatriations" \
 		3 "Manage strategies" \
+<<<<<<< HEAD
 		4 "Generate a report"\
+=======
+		4 "Generate a report" \
+>>>>>>> dev_steph
 		5 "Quit"`
 
 	case $choice in

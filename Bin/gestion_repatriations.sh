@@ -38,7 +38,7 @@ function init {
 function displayMenu {
 	echo "displayMenu function called"
 	choice=`zenity --list --title="Automatized repatriation" --text="Select a choice :" --width=320 --height=215 \
-		--column="" --column="Repatriation Menu" \
+		--column="" --column="Repatriation menu" \
 		1 "Display list" \
 		2 "Add" \
 		3 "Delete"\
