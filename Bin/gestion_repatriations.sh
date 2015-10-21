@@ -37,11 +37,12 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=207 \
-		--column="" --column="Description" \
-		1 "Display the list of all repatriations" \
-		2 "Add a repatriation" \
-		3 "Delete a repatriation"`
+	choice=`zenity --list --title="Automatized repatriation" --text="Select a choice :" --width=320 --height=215 \
+		--column="" --column="REPATRIATION" \
+		1 "Display list" \
+		2 "Add" \
+		3 "Delete"\
+		4 "Back to Main Menu"`
 		
 		case $choice in
 		1)
@@ -56,6 +57,10 @@ function displayMenu {
 			echo "Choice 3 selected : Delete repatriation(s)"
 			delRepatriation
 			;;
+		4)
+			echo "Choice 4 selected : Back to Main Menu"
+			../main.sh 
+			;;
 
 		*)
 			echo "Canceled"
@@ -69,7 +74,7 @@ function listRepatriations {
 	id=$(cat $fileListRepatriations | cut -d : -f 1) 
 	folder=$(cat $fileListRepatriations | cut -d : -f 2) 
 	file_adress=$(cat $fileListRepatriations | cut -d : -f 3)
-	yad --list --center --text="Display repatriation" --width=600 --height=300\
+	yad --title="Automatized repatriation" --list --center --text="Display repatriation" --width=600 --height=300\
 			--column="Id" $id --column="Destination folder" $folder --column="File link" $file_adress \
 			--button=Return
 	
@@ -80,7 +85,7 @@ function listRepatriations {
 # Add one repatriation in Data/list_repatriations.txt
 function addRepatriation {
 	echo "addRepatriation function called"
-	newRepatriation=`yad --width=400 --title="" --center --text="Please enter your details:" --separator=":" \
+	newRepatriation=`yad --title="Add a repatriation"--width=400 --title="" --center --text="Please enter your details:" --separator=":" \
 		--form \
 		--field="Destination folder" \
 		--field="File adress"`
