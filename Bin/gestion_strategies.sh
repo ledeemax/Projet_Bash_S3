@@ -40,6 +40,35 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
+	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=215 \
+		--column="" --column="Strategy menu" \
+		1 "Display list" \
+		2 "Add" \
+		3 "Delete"\
+		4 "Back to Main Menu"`
+		
+	case $choice in
+		1)
+			echo "Choice 1 selected : Display the list of all strategies"
+			listStrategies
+			;;
+		2)
+			echo "Choice 2 selected : Add a strategy"
+			addStrategy
+			;;
+		3)
+			echo "Choice 3 selected : Delete user(s)"
+			delStrategy
+			;;
+		4)
+			echo "Choice 4 selected : Back to Main Menu"
+			../main.sh 
+			;;
+
+		*)
+			echo "Canceled"
+			;;
+	esac
 }
 
 # List the strategies contained in Data/list_strategies.txt file

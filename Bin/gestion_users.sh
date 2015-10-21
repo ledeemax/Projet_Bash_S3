@@ -39,10 +39,10 @@ function init {
 function displayMenu {
 	echo "displayMenu function called"
 	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=215 \
-		--column="" --column="Description" \
-		1 "Display the list of all users" \
-		2 "Add a user" \
-		3 "Delete a user"\
+		--column="" --column="User menu" \
+		1 "Display list" \
+		2 "Add" \
+		3 "Delete"\
 		4 "Back to Main Menu"`
 		
 	case $choice in
