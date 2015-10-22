@@ -38,12 +38,13 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=215 \
+	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=250 \
 		--column="" --column="User menu" \
 		1 "Display list" \
 		2 "Add" \
-		3 "Delete"\
-		4 "Back to Main Menu"`
+		3 "Modify" \
+		4 "Delete"\
+		5 "Back to Main Menu"`
 		
 	case $choice in
 		1)
@@ -55,12 +56,16 @@ function displayMenu {
 			addUser
 			;;
 		3)
-			echo "Choice 3 selected : Delete user(s)"
-			delUser
+			echo "Choice 3 selected : Modify user"
+			modifyUser
 			;;
 		4)
-			echo "Choice 4 selected : Back to Main Menu"
-			./main.sh 
+			echo "Choice 4 selected : Delete user(s)"
+			delUser
+			;;
+		5)
+			echo "Choice 5 selected : Back to Main Menu"
+			exec ${scriptMain}
 			;;
 
 		*)
@@ -109,12 +114,68 @@ function getNewId {
 	newId=$(($lastId+1))
 }
 
+# Modify one user
+function modifyUser {
+	echo "modifyUser function called"
+	
+	listUsers=$(cat ${fileListUsers} | tr "\n" "," | sed "s/,$//")
+	userToModify=`yad --width=400 --center --title="Modify user" --text="Please enter your changes:" --separator="#" \
+		--form --item-separator="," \
+		--field="Select user :":CB \
+		--field="New user Last name :" \
+		--field="New user First name :" \
+		--field="New user email :" \
+		--text="Value will not be changed for unfilled field." \
+		"${listUsers}"`
+	if ! [ -z "$userToModify" ]
+	then
+		echo "$userToModify" 
+		# 6 fe  fezzz
+
+		# 6:BERGER:michel:michel_b@gmail.com|BERGER|Michel|michhhhh@b.fr|
+		# 5:LE_TIROIR_DE_LA_COMMODE:monique:momo.tiroir@gege.com||Micheline||
+		idUser=`echo $userToModify | cut -c 1`
+		newlastName=`echo $userToModify | cut -d"#" -f 2`
+		newfirstName=`echo $userToModify | cut -d"#" -f 3`
+		newMail=`echo $userToModify | cut -d"#" -f 4`
+		
+		echo "$idUser $firstName $lastName $mail"
+		
+		if [ -z "$newLastName" ]
+		then
+			echo "pas de valeurs dans last name"
+		else
+			lastName=$newLastName
+		fi
+
+
+		if [ -z "$newFirstName" ]
+		then 
+			echo "pas de valeurs dans first name"
+		else
+			firstName=$newFirstName
+		fi
+		
+		
+		if [ -z "$newMail" ]
+		then 
+			echo "pas de valeurs dans mail"
+		else
+			email=$newMail
+		fi
+		echo "$idUser $firstName $lastName $mail"
+	else
+		displayMenu
+	fi
+}
+
 # Delete one or many user(s) in Data/list_users.txt
 function delUser {
 	echo "delUser function called"
 	local listUsersToDel=`zenity --list --checklist --separator=" " --text="Select user(s) to delete :" --width=500 --height=300\
 			--column="" --column="Utilisateurs" \
 			$(sed s/^/FALSE\ / ${fileListUsers})`
+
 	if ! [ -z "$listUsersToDel" ]
 	then 
 		for user in `echo $listUsersToDel`
