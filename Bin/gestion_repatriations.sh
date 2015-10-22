@@ -59,7 +59,7 @@ function displayMenu {
 			;;
 		4)
 			echo "Choice 4 selected : Back to Main Menu"
-			./main.sh 
+			exec ${scriptMain} 
 			;;
 
 		*)
@@ -102,7 +102,7 @@ function addRepatriation {
 		echo "$newId:$newDestinationFolder:$newFileAdress" >> $fileListRepatriations 
 		echo "New Repatriation add"
 		yad --center --width=400 --title="What next?" --text "A new repatriation has been successfully added. \n You can now add a strategie. \n Click \"Validate\" to return to Main Menu."
-		./main.sh
+		exec ${scriptMain}
 	else
 		yad --center --width=400 --title="No new repatriation add" --text "No repatriation added. \n Click \"Validate\" to return to Repatriation Menu." 
 		displayMenu
@@ -135,7 +135,7 @@ function delRepatriation {
 				sed -i "\?${repatriation}?d" ${fileListRepatriations}
 				chmod +w ${fileListRepatriations}
 				yad --center --width=400 --title="What next?" --text "Repatriation has been successfully deleted. \n Click \"Validate\" to return to Main Menu." 
-				./main.sh
+				exec ${scriptMain}
 			fi
 		done
 	else

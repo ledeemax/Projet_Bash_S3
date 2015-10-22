@@ -62,7 +62,7 @@ function displayMenu {
 			;;
 		4)
 			echo "Choice 4 selected : Back to Main Menu"
-			./main.sh 
+			exec ${scriptMain} 
 			;;
 
 		*)
@@ -183,7 +183,7 @@ function delCron {
 	rm -f mycron.tmp
 	echo -e "Successfull removal of the strategy n°${idToDel} in crontab"
 	yad --center --width=400 --title="Strategy deleted" --text "The strategy/strategies has successfully been deleted. Click \"Validate\" to return to the Main Menu " 
-		exec ${scriptMain}
+	exec ${scriptMain}
 }
 
 # Get the max ID in Data/list_strategies.txt, and increment to 1
