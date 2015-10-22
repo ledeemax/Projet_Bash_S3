@@ -92,13 +92,14 @@ function addUser {
 	getNewId
 	if ! [ -z "$newUser" ]
 	then
-		lastName=`echo $newUser | sed "s/ /_/" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
-		firstName=`echo $newUser | cut -d : -f 2`
+		lastName=`echo $newUser | sed "s/ /_/g" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
+		firstName=`echo $newUser | cut -d : -f 2` 
 		email=`echo $newUser | cut -d : -f 3 | sed "s/:$//"`
 		echo "$newId:$lastName:$firstName:$email" >> $fileListUsers # Ajoute le nouvel utilisateur au fichier Utilisateur
-		yad --center --width=400 --title="What next?" --text "You can now add a repatriation or a strategy :) " 
+		yad --center --width=400 --title="What next?" --text "A new user has been successfully added. \n You can now add a repatriation or a strategy :) " 
 		exec ${scriptMain}
 	else
+		yad --center --width=400 --title="No new user add" --text "No user added. \n Click \"Validate\" to return to User Menu." 
 		displayMenu
 	fi
 }
@@ -127,7 +128,8 @@ function delUser {
 			chmod +w ${fileListUsers}
 		fi
 	done
-	displayMenu
+	yad --center --width=400 --title="User deleted" --text "User(s) has been successfully deleted. \n Click \"Validate\" to return to the Main Menu." 
+	exec ${scriptMain}
 }
 
 
