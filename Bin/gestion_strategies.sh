@@ -74,6 +74,11 @@ function displayMenu {
 # List the strategies contained in Data/list_strategies.txt file
 function listStrategies {
 	echo "listStrategies function called"
+	strategies=$(cut -d : -f 2- $fileListStrategies) 
+	yad --center --list --separator=${sep} --button=Return  --text="Display strategies" --width=600 --height=300\
+			--column="Users" $strategies
+	echo "Return to Menu"
+	displayMenu
 }
 
 # Delete one or many strategie(s) in Data/list_strategies.txt
@@ -103,7 +108,7 @@ function addStrategy {
 	# --field="Examples setting personal periodicity :":RO \
 	# "Tous les jours à 12h30 : 30 12 * * *"
 	
-	strategyToAdd=`yad --width=400 --title="Add strategy" --text="Please enter your strategy:" \
+	strategyToAdd=`yad --width=400 --center --title="Add strategy" --text="Please enter your strategy:" \
 		--form --item-separator="," \
 		--field="Select user :":CB \
 		--field="Select source file :":CB \
@@ -114,6 +119,8 @@ function addStrategy {
 	if [ "${strategyToAdd}" == "" ]
 	then
 		echo "Cancelling to add a strategy"
+		displayMenu
+		
 	else
 		idUser=$(echo $(echo ${strategyToAdd} | cut -f 1 -d"|") | cut -f 1 -d":")
 		idRepatriation=$(echo $(echo ${strategyToAdd} | cut -f 2 -d"|") | cut -f 1 -d":")
@@ -134,7 +141,10 @@ function addStrategy {
 		chmod +w ${fileListStrategies}
 		echo ${strategyToAdd} >> ${fileListStrategies}
 		addCron
+		yad --center --width=400 --title="What next?" --text "Your strategy has been successfully add. Click \"Validate\" to return to the Main Manu." 
+		exec ${scriptMain}
 	fi
+	
 }
 
 # Add a cron in crontab file
@@ -157,6 +167,8 @@ function delCron {
 	crontab mycron.tmp
 	rm -f mycron.tmp
 	echo -e "Successfull removal of the strategy n°${idToDel} in crontab"
+	yad --center --width=400 --title="Strategy deleted" --text "The strategy/strategies has successfully been deleted. Click \"Validate\" to return to the Main Menu " 
+		exec ${scriptMain}
 }
 
 # Get the max ID in Data/list_strategies.txt, and increment to 1
