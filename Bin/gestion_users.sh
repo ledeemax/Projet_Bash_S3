@@ -70,11 +70,18 @@ function displayMenu {
 }
 
 # List the users contained in ../Data/list_users.txt file
-function listUsers {	# TODO : au lieu d'une seule colonne en construire 3 ac Nom - Prenom - mail
+function listUsers {
 	echo "listUsers function called"
-	user=$(cut -d : -f 2- $fileListUsers) # User file without Id
-	yad --center --list --separator=${sep} --button=Return  --text="Display users" --width=600 --height=300\
-			--column="Users" $user
+
+	local itemsUsers=()
+	while IFS=':' read -r idUser firstName lastName mail ; do
+		itemsUsers+=( "$idUser" "$firstName" "$lastName" "$mail" )
+	done < <(cat $fileListUsers)
+
+	yad --text="Display users" --list --center --width=600 --height=300 \
+			--column="IdUser" --column="First name" --column="Last name" --column="Mail" \
+			"${itemsUsers[@]}" \
+			 --button=Return
 	
 	echo "Return to Menu"
 	displayMenu
