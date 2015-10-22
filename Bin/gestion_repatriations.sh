@@ -90,10 +90,17 @@ function addRepatriation {
 		--field="Destination folder" \
 		--field="File adress"`
 	getNewId
-	newDestinationFolder=`echo $newRepatriation | cut -d : -f 1`
-	newFileAdress=`echo $newRepatriation | cut -d : -f 2`
-	echo "$newId:$newDestinationFolder:$newFileAdress" >> $fileListRepatriations 
-	echo "New Repatriation add"
+	if ! [ -z "$newRepatriation" ]
+	then
+		chmod +w ${fileListRepatriations}
+		newDestinationFolder=`echo $newRepatriation | cut -d : -f 1`
+		newFileAdress=`echo $newRepatriation | cut -d : -f 2`
+		echo "$newId:$newDestinationFolder:$newFileAdress" >> $fileListRepatriations 
+		echo "New Repatriation add"
+		yad --center --width=400 --title="What next?" --text "A new repatriation has been successfully added. \n You can now add a strategie. \n Click \"Validate\" to return to the Main Menu."
+	else
+		yad --center --width=400 --title="No new repatriation add" --text "No repatriation added. \n Click \"Validate\" to return to User Menu." 
+	fi
 	../main.sh
 }
 
@@ -115,10 +122,13 @@ function delRepatriation {
 		then
 			zenity --warning --width=500 --height=50 \
 				--text "ID repatriation's is used in list strategies's. Please remove the strategy containing the repatriation ID's (${idRepatriation}), then come back here to remove it"
+			exec ${scriptMain}
 		else
 			echo "Removing of repatriation : ${repatriation}"
 			sed -i "\?${repatriation}?d" ${fileListRepatriations}
 			chmod +w ${fileListRepatriations}
+			yad --center --width=400 --title="What next?" --text "Repatriation has been successfully deleted. \n Click \"Validate\" to return to User Menu." 
+			../main.sh
 		fi
 	done
 }

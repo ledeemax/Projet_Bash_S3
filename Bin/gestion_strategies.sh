@@ -87,13 +87,19 @@ function delStrategy {
 	listStrategiesToDel=`zenity --list --checklist --separator=" " --text="Select strategie(s) to delete :" --width=500 --height=300\
 			--column="" --column="Strategies" \
 			$(sed s/^/FALSE\ / ${fileListStrategies})`
-	for strategyToDel in `echo $listStrategiesToDel`
-	do
-		echo "Removing of strategy : ${strategyToDel}"
-		sed -i "/${strategyToDel}/d" ${fileListStrategies}
-		idStrategyToDel=`echo ${strategyToDel} | cut -f 1 -d":"`
-		delCron ${idStrategyToDel}
-	done
+	if ! [ -z "$listStrategiesToDel" ]
+	then
+		for strategyToDel in `echo $listStrategiesToDel`
+		do
+			echo "Removing of strategy : ${strategyToDel}"
+			sed -i "/${strategyToDel}/d" ${fileListStrategies}
+			idStrategyToDel=`echo ${strategyToDel} | cut -f 1 -d":"`
+			delCron ${idStrategyToDel}
+		done
+	else
+		yad --center --width=400 --title="No strategy deleted" --text "No strategy deleted. \n Click \"Validate\" to return to Strategy Menu." 
+		displayMenu
+	fi
 }
 
 # Add one strategy in Data/list_strategies.txt
@@ -119,6 +125,7 @@ function addStrategy {
 	if [ "${strategyToAdd}" == "" ]
 	then
 		echo "Cancelling to add a strategy"
+		yad --center --width=400 --title="What next?" --text "No strategy added. \n Click \"Validate\" to return to the Main Manu." 
 		displayMenu
 		
 	else
@@ -141,7 +148,7 @@ function addStrategy {
 		chmod +w ${fileListStrategies}
 		echo ${strategyToAdd} >> ${fileListStrategies}
 		addCron
-		yad --center --width=400 --title="What next?" --text "Your strategy has been successfully add. Click \"Validate\" to return to the Main Manu." 
+		yad --center --width=400 --title="What next?" --text "Your strategy has been successfully add. \n Click \"Validate\" to return to the Main Manu." 
 		exec ${scriptMain}
 	fi
 	
