@@ -59,7 +59,7 @@ function displayMenu {
 			;;
 		4)
 			echo "Choice 4 selected : Back to Main Menu"
-			../main.sh 
+			./main.sh 
 			;;
 
 		*)
@@ -97,11 +97,12 @@ function addRepatriation {
 		newFileAdress=`echo $newRepatriation | cut -d : -f 2`
 		echo "$newId:$newDestinationFolder:$newFileAdress" >> $fileListRepatriations 
 		echo "New Repatriation add"
-		yad --center --width=400 --title="What next?" --text "A new repatriation has been successfully added. \n You can now add a strategie. \n Click \"Validate\" to return to the Main Menu."
+		yad --center --width=400 --title="What next?" --text "A new repatriation has been successfully added. \n You can now add a strategie. \n Click \"Validate\" to return to Main Menu."
+		./main.sh
 	else
-		yad --center --width=400 --title="No new repatriation add" --text "No repatriation added. \n Click \"Validate\" to return to User Menu." 
+		yad --center --width=400 --title="No new repatriation add" --text "No repatriation added. \n Click \"Validate\" to return to Repatriation Menu." 
+		displayMenu
 	fi
-	../main.sh
 }
 
 function getNewId {
@@ -115,22 +116,28 @@ function delRepatriation {
 	local listRepatriationsToDel=`zenity --list --checklist --separator=" " --text="Select repatriation(s) to delete :" --width=500 --height=300\
 			--column="" --column="Repatriations" \
 			$(sed s/^/FALSE\ / ${fileListRepatriations})`
-	for repatriation in `echo $listRepatriationsToDel`
-	do
-		local idRepatriation=`echo ${repatriation} | cut -f 1 -d":"`
-		if [ "$(cut -f 3 -d":" ${fileListStrategies} | grep ${idRepatriation})" ]
-		then
-			zenity --warning --width=500 --height=50 \
-				--text "ID repatriation's is used in list strategies's. Please remove the strategy containing the repatriation ID's (${idRepatriation}), then come back here to remove it"
-			exec ${scriptMain}
-		else
-			echo "Removing of repatriation : ${repatriation}"
-			sed -i "\?${repatriation}?d" ${fileListRepatriations}
-			chmod +w ${fileListRepatriations}
-			yad --center --width=400 --title="What next?" --text "Repatriation has been successfully deleted. \n Click \"Validate\" to return to User Menu." 
-			../main.sh
-		fi
-	done
+	if ! [ -z "$newRepatriation" ]
+	then
+		for repatriation in `echo $listRepatriationsToDel`
+		do
+			local idRepatriation=`echo ${repatriation} | cut -f 1 -d":"`
+			if [ "$(cut -f 3 -d":" ${fileListStrategies} | grep ${idRepatriation})" ]
+			then
+				zenity --warning --width=500 --height=50 \
+					--text "ID repatriation's is used in list strategies's. Please remove the strategy containing the repatriation ID's (${idRepatriation}), then come back here to remove it"
+				exec ${scriptMain}
+			else
+				echo "Removing of repatriation : ${repatriation}"
+				sed -i "\?${repatriation}?d" ${fileListRepatriations}
+				chmod +w ${fileListRepatriations}
+				yad --center --width=400 --title="What next?" --text "Repatriation has been successfully deleted. \n Click \"Validate\" to return to Main Menu." 
+				./main.sh
+			fi
+		done
+	else
+		yad --center --width=400 --title="No repatriation deleted" --text "No repatriation deleted. \n Click \"Validate\" to return to Repatriation Menu." 
+		displayMenu
+	fi
 }
 
 

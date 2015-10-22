@@ -60,7 +60,7 @@ function displayMenu {
 			;;
 		4)
 			echo "Choice 4 selected : Back to Main Menu"
-			../main.sh 
+			./main.sh 
 			;;
 
 		*)
@@ -115,21 +115,27 @@ function delUser {
 	local listUsersToDel=`zenity --list --checklist --separator=" " --text="Select user(s) to delete :" --width=500 --height=300\
 			--column="" --column="Utilisateurs" \
 			$(sed s/^/FALSE\ / ${fileListUsers})`
-	for user in `echo $listUsersToDel`
-	do
-		local idUser=`echo ${user} | cut -f 1 -d":"`
-		if [ "$(cut -f 2 -d":" ${fileListStrategies} | grep ${idUser})" ]
-		then
-			zenity --warning --width=500 --height=50 \
-				--text "ID user's is used in list strategies's. Please remove the strategy containing the user ID's (${idUser}), then come back here to remove it"
-		else
-			echo "Removing of user : ${user}"
-			sed -i "/${user}/d" ${fileListUsers}
-			chmod +w ${fileListUsers}
-		fi
-	done
-	yad --center --width=400 --title="User deleted" --text "User(s) has been successfully deleted. \n Click \"Validate\" to return to the Main Menu." 
-	exec ${scriptMain}
+	if ! [ -z "$listUsersToDel" ]
+	then 
+		for user in `echo $listUsersToDel`
+		do
+			local idUser=`echo ${user} | cut -f 1 -d":"`
+			if [ "$(cut -f 2 -d":" ${fileListStrategies} | grep ${idUser})" ]
+			then
+				zenity --warning --width=500 --height=50 \
+					--text "ID user's is used in list strategies's. Please remove the strategy containing the user ID's (${idUser}), then come back here to remove it"
+			else
+				echo "Removing of user : ${user}"
+				sed -i "/${user}/d" ${fileListUsers}
+				chmod +w ${fileListUsers}
+			fi
+		done
+		yad --center --width=400 --title="User deleted" --text "User(s) has been successfully deleted. \n Click \"Validate\" to return to the Main Menu." 
+		exec ${scriptMain}
+	else
+		yad --center --width=400 --title="No user deleted" --text "No user deleted. \n Click \"Validate\" to return to User Menu." 
+		displayMenu
+	fi
 }
 
 

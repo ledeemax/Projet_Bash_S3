@@ -62,7 +62,7 @@ function displayMenu {
 			;;
 		4)
 			echo "Choice 4 selected : Back to Main Menu"
-			../main.sh 
+			./main.sh 
 			;;
 
 		*)
@@ -125,7 +125,7 @@ function addStrategy {
 	if [ "${strategyToAdd}" == "" ]
 	then
 		echo "Cancelling to add a strategy"
-		yad --center --width=400 --title="What next?" --text "No strategy added. \n Click \"Validate\" to return to the Main Manu." 
+		yad --center --width=400 --title="What next?" --text "No strategy added. \n Click \"Validate\" to return to the Strategy Manu." 
 		displayMenu
 		
 	else
