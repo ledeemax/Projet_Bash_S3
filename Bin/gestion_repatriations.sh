@@ -72,14 +72,14 @@ function displayMenu {
 function listRepatriations {
 	echo "listRepatriations function called"
 
-	items=()
+	local itemsRepatriations=()
 	while IFS=':' read -r idRepatriation destFolder SourceFile ; do
-		items+=( "$idRepatriation" "$destFolder" "$SourceFile" )
+		itemsRepatriations+=( "$idRepatriation" "$destFolder" "$SourceFile" )
 	done < <(cat $fileListRepatriations)
 
 	yad --title="Automatized repatriation" --list --center --text="Display repatriation" --width=600 --height=300 \
 			--column="Id" --column="Destination folder" --column="Source file" \
-			"${items[@]}" \
+			"${itemsRepatriations[@]}" \
 			--button=Return
 	
 	echo "Return to Menu"

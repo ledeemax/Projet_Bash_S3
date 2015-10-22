@@ -74,9 +74,17 @@ function displayMenu {
 # List the strategies contained in Data/list_strategies.txt file
 function listStrategies {
 	echo "listStrategies function called"
-	strategies=$(cut -d : -f 2- $fileListStrategies) 
-	yad --center --list --separator=${sep} --button=Return  --text="Display strategies" --width=600 --height=300\
-			--column="Users" $strategies
+
+	local itemsStrategies=()
+	while IFS=':' read -r idStrategy idUser idRepatriation periodicity isToLog ; do
+		itemsStrategies+=( "$idStrategy" "$idUser" "$idRepatriation" "$periodicity" "$isToLog" )
+	done < <(cat $fileListStrategies)
+
+	yad --text="Display strategies" --list --center --width=600 --height=300 \
+			--column="IdStrategy" --column="IdUser" --column="IdRepatriation" --column="Periodicity" --column="is to log?" \
+			"${itemsStrategies[@]}" \
+			 --button=Return
+
 	echo "Return to Menu"
 	displayMenu
 }
