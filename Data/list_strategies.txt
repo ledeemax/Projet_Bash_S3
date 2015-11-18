@@ -1,2 +1,2 @@
 1:1:1:journaliere:yes
-2:2:1:hebdomadaire:yes
+2:2:2:hebdomadaire:yes

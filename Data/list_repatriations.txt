@@ -1,2 +1,2 @@
-1:/NCBI/Genomes/:ftp.ncbi.nih.gov/genomes/Drosophiles_melanogaster/chr1.gz
-2:/NCBI/Human_Genomic/:ftp.ebi.ac.uk/genomes/Drosophiles_melanogaster/chr1.gz
+1:NCBI/Genomes/:ftp.ncbi.nih.gov/genomes/Drosophila_melanogaster/RELEASE_5_48/CHR_2/NT_033778.faa
+2:NCBI/Genomes/:ftp.ncbi.nih.gov/genomes/Alligator_mississippiensis/allcontig.agp.gz
