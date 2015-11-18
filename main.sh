@@ -118,6 +118,7 @@ function getData {
 	local repatriationLine=`grep ^${idRepatriation}: ${fileListRepatriations}`
 	local destRepatriation=`echo ${repatriationLine} | cut -f 2 -d":"`
 	local sourceRepatriation=`echo ${repatriationLine} | cut -f 3 -d":"`
+	#local protocolRepatriation=`echo ${repatriationLine} | cut -f 4 -d":"`
 	
 	local userLine=`grep ^${idUser}: ${fileListUsers}`
 	local lastNameUser=`echo ${userLine} | cut -f 2 -d":"`
@@ -129,11 +130,34 @@ function getData {
 	echo -e "\t idRepatriation : $idRepatriation"
 	echo -e "\t periodicity : $periodicity"
 	echo -e "\t isToLog : $isToLog"
+	destRepatriation=Data/${destRepatriation}
 	echo -e "\t destRepatriation : $destRepatriation"
 	echo -e "\t sourceRepatriation : $sourceRepatriation"
+	#echo -e "\t protocolRepatriation : $protocolRepatriation"
 	echo -e "\t lastNameUser : $lastNameUser"
 	echo -e "\t firstNameUser : $firstNameUser"
 	echo -e "\t mailUser : $mailUser"
+
+	#echo -e "telechargement de : ${protocolRepatriation}://${sourceRepatriation} \n"
+	echo -e "telechargement de : ${sourceRepatriation} \n"
+
+	wget --timestamping \
+		--progress=bar \
+		--level=1 \
+		--append-output log_wget.tmp \
+		--directory-prefix ${destRepatriation} \
+		--no-remove-listing \
+		--tries=45 \
+		--no-parent \
+		--quota=1k \
+		${sourceRepatriation}
+		
+#	if protocol == 'ftp' :
+#		FTPDownload(protocol, server, remote_dir)
+#	if protocol == 'http':
+#		HTTPDownload(protocol, server, remote_dir, self.bank.config)
+#	if protocol == 'local':
+#		dLocalDownload(remote_dir)
 
 #	isRecent= checkFileIsRecent()
 #
@@ -141,16 +165,11 @@ function getData {
 #	{
 #		wget ftp...fichier.fq
 #	}
-#	if isLog=='y') 
-#	{
-#		id_user=grep $1 list_strategies.txt | cut f=2
-#		prenom=grep $id_user list_users.txt | cut f=2
-#		nom=grep $id_user list_users.txt | cut f=3
-#		if (on a bien télécharger le fichier
-#			setLog() # réussie >> log
-#		else
-#			setLogéchec >> log
-#	}
+
+	if [ "$isToLog" == "yes" ] 
+	then
+		setLog $idUser $lastNameUser $firstNameUser $mailUser $destRepatriation $sourceRepatriation
+	fi
 }
 
 # Check if file to download is not already present in local repertory.
@@ -161,6 +180,28 @@ function checkLastFile {
 # Generate/update a log file.
 function setLog {
 	echo "setLog function called"
+	local idUser=$1
+	local lastNameUser=$2
+	local firstNameUser=$3
+	local mailUser=$4
+	local destRepatriation=$5
+	local sourceRepatriation=$6
+	
+#		if (on a bien télécharger le fichier
+#			setLog() # réussie >> log
+#		else
+#			setLogéchec >> log
+
+#date:nom:prenom:email:destFile:sourcFile:RES
+
+#RES:
+#- téléchargement réussie (taille)
+#- fichier source non disponible
+#- fichier récent déjà présent en local
+#- échec lors du téléchargement
+#- espace de stockage insuffisant
+
+#destFile: TODO lors du rapport, mettre un lien symbolique cliquable
 }
 
 
