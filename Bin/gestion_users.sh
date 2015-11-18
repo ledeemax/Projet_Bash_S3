@@ -14,7 +14,8 @@ USAGE="Usage:\
 \t $0 \n\
 \t $0 [1] [--list] [-l] \n\
 \t $0 [2] [--add] [-a] \n\
-\t $0 [3] [--del] [-d] \n\
+\t $0 [3] [--modif] [-m] \n\
+\t $0 [4] [--del] [-d] \n\
 \t $0 [--help] [-h] \n\
 \t $0 [--version] [-v]"
 VERSION=1
@@ -228,7 +229,11 @@ else
 			echo "Add a user (call of addUser function)"
 			addUser
 			;;
-		3 | "--del" | "-d")
+		3 | "--modif" | "-m")
+			echo "Modify a user (call of modifyUser function)"
+			modifyUser
+			;;
+		4 | "--del" | "-d")
 			echo "Delete a user (call of delUser function)"
 			delUser
 			;;
