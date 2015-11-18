@@ -127,7 +127,7 @@ function modifyUser {
 	echo "modifyUser function called"
 	
 	listUsers=$(cat ${fileListUsers} | tr "\n" "," | sed "s/,$//")
-	userToModify=`yad --width=400 --center --title="Modify user" --text="Please enter your changes:" --separator="#" \
+	userToModify=`yad --width=400 --center --title="Modify user" --text="Please enter your changes:" --separator=":" \
 		--form --item-separator="," \
 		--field="Select user :":CB \
 		--field="New user Last name :" \
@@ -135,23 +135,19 @@ function modifyUser {
 		--field="New user email :" \
 		--text="Value will not be changed for unfilled field." \
 		"${listUsers}"`
-	if ! [ -z "$userToModify" ]
-	then
-		echo "$userToModify" 
-		# 6 fe  fezzz
 
-		# 6:BERGER:michel:michel_b@gmail.com|BERGER|Michel|michhhhh@b.fr|
-		# 5:LE_TIROIR_DE_LA_COMMODE:monique:momo.tiroir@gege.com||Micheline||
+		#echo $userToModify
+		oldIdentity=`echo $userToModify | cut -d":" -f -5 | sed "s/.$//"`
+		echo $oldIdentity
 		idUser=`echo $userToModify | cut -c 1`
-		newlastName=`echo $userToModify | cut -d"#" -f 2`
-		newfirstName=`echo $userToModify | cut -d"#" -f 3`
-		newMail=`echo $userToModify | cut -d"#" -f 4`
-		
-		echo "$idUser $firstName $lastName $mail"
+		newLastName=`echo $userToModify | cut -d":" -f 5`
+		newFirstName=`echo $userToModify | cut -d":" -f 6`
+		newMail=`echo $userToModify | cut -d":" -f 7`
 		
 		if [ -z "$newLastName" ]
 		then
 			echo "pas de valeurs dans last name"
+			lastName=`echo $userToModify | cut -d":" -f 2`
 		else
 			lastName=$newLastName
 		fi
@@ -160,6 +156,7 @@ function modifyUser {
 		if [ -z "$newFirstName" ]
 		then 
 			echo "pas de valeurs dans first name"
+			firstName=`echo $userToModify | cut -d":" -f 3`
 		else
 			firstName=$newFirstName
 		fi
@@ -168,13 +165,22 @@ function modifyUser {
 		if [ -z "$newMail" ]
 		then 
 			echo "pas de valeurs dans mail"
+			email=`echo $userToModify | cut -d":" -f 4`
 		else
 			email=$newMail
 		fi
-		echo "$idUser $firstName $lastName $mail"
-	else
+		# Remplacer ancienen identité dans le fichier $fileListUsers par la nouvelle
+		newIdentity=`echo $idUser:$lastName:$firstName:$email`
+		echo $newIdentity
+		echo $oldIdentity 
+		sed -i "s/${oldIdentity}/${newIdentity}/" ${fileListUsers}
+		
+		yad --center --width=400 \
+		--title="Change accepted" \
+		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+
+		
 		displayMenu
-	fi
 }
 
 # Delete one or many user(s) in Data/list_users.txt
