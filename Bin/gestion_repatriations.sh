@@ -57,7 +57,7 @@ function displayMenu {
 			;;
 		3)
 			echo "Choice 3 selected : Modify a repatriation"
-			addRepatriation
+			modifyRepatriation
 			;;	
 		4)	
 			echo "Choice 4 selected : Delete repatriation(s)"

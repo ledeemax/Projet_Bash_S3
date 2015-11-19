@@ -14,7 +14,8 @@ USAGE="Usage:\
 \t $0 \n\
 \t $0 [1] [--list] [-l] \n\
 \t $0 [2] [--add] [-a] \n\
-\t $0 [3] [--del] [-d] \n\
+\t $0 [3] [--modif] [-m] \n\
+\t $0 [4] [--del] [-d] \n\
 \t $0 [--help] [-h] \n\
 \t $0 [--version] [-v]"
 VERSION=1
@@ -44,8 +45,9 @@ function displayMenu {
 		--column="" --column="Strategy menu" \
 		1 "Display list" \
 		2 "Add" \
-		3 "Delete"\
-		4 "Back to Main Menu"`
+		3 "Modify"\
+		4 "Delete"\
+		5 "Back to Main Menu"`
 		
 	case $choice in
 		1)
@@ -57,11 +59,15 @@ function displayMenu {
 			addStrategy
 			;;
 		3)
-			echo "Choice 3 selected : Delete user(s)"
-			delStrategy
+			echo "Choice 3 selected : Modify a strategy"
+			modifyStrategy
 			;;
 		4)
-			echo "Choice 4 selected : Back to Main Menu"
+			echo "Choice 4 selected : Delete strategy(ies)"
+			delStrategy
+			;;
+		5)
+			echo "Choice 5 selected : Back to Main Menu"
 			exec ${scriptMain} 
 			;;
 
@@ -160,6 +166,45 @@ function addStrategy {
 		exec ${scriptMain}
 	fi
 	
+}
+
+# Modify one strategy
+function modifyStrategy {
+	echo "modifyStrategy function called"
+	
+	listStrategies=$(cat ${fileListStrategies} | tr "\n" "," | sed "s/,$//")
+	strategyToModify=`yad --width=400 --height=215 --center --title="Modify strategy" --text="Please enter your changes:" --separator=":" \
+		--form --item-separator="," \
+		--field="Select strategy :":CB \
+		--field="New periodicity :":CB \
+		--text="Repatriation = id:destination_folder:file adress \n Value will not be changed for unfilled field." \
+		"${listStrategies}" "${listPeriodicities}"`
+		
+		echo $strategyToModify
+		oldStrategy=`echo $strategyToModify | cut -d":" -f -3` 
+		echo $oldStrategy
+		idStrategy=`echo $strategyToModify | cut -c 1`
+		newPeriodicity=`echo $strategyToModify | cut -d"#" -f 2`
+		
+		if [ -z "$newPeriodicity" ]
+		then
+			echo "pas de valeurs dans periodicity"
+			periodicity=`echo $strategyToModify | cut -d":" -f 2`
+		else
+			periodicity=$newPeriodicity
+		fi
+		
+		# Remplacer ancienne identité dans le fichier $fileListUsers par la nouvelle
+		#newRepatriation=`echo $idRepatriation:$destinationFolder:$fileAdress`
+		#echo $newRepatriation 
+		#sed -i "s#${oldRepatriation}#${newRepatriation}#" ${fileListRepatriations}
+		
+		yad --center --width=400 \
+		--title="Change accepted" \
+		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+
+		
+		displayMenu
 }
 
 # Add a cron in crontab file
