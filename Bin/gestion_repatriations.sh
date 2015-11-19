@@ -114,6 +114,59 @@ function getNewId {
 	newId=$(($lastId+1))
 }
 
+# Modify one repatriation
+function modifyRepatriation {
+	echo "modifyRepatriation function called"
+	
+	listRepatriations=$(cat ${fileListRepatriations} | tr "\n" "," | sed "s/,$//")
+	repatriationToModify=`yad --width=400 --height=215 --center --title="Modify repatriation" --text="Please enter your changes:" --separator="#" \
+		--form --item-separator="," \
+		--field="Select repatriation :":CB \
+		--field="New destination folder :" \
+		--field="New file adress :" \
+		--text="Repatriation = id:destination_folder:file adress \n Value will not be changed for unfilled field." \
+		"${listRepatriations}"`
+		
+		echo $repatriationToModify
+		oldRepatriation=`echo $repatriationToModify | cut -d"#" -f 1` 
+		echo $oldRepatriation
+		idRepatriation=`echo $repatriationToModify | cut -c 1`
+		newDestinationFolder=`echo $repatriationToModify | cut -d"#" -f 2`
+		echo $newDestinationFolder
+		newFileAdress=`echo $repatriationToModify | cut -d"#" -f 3`
+		echo $newFileAdress
+		
+		if [ -z "$newDestinationFolder" ]
+		then
+			echo "pas de valeurs dans destination folder"
+			destinationFolder=`echo $repatriationToModify | cut -d":" -f 2`
+		else
+			destinationFolder=$newDestinationFolder
+		fi
+
+
+		if [ -z "$newFileAdress" ]
+		then 
+			echo "pas de valeurs dans file adress"
+			fileAdress=`echo $repatriationToModify | cut -d":" -f 3`
+			fileAdress=`echo $fileAdress | cut -d"#" -f 1`
+		else
+			fileAdress=$newFileAdress
+		fi
+		
+		# Remplacer ancienne identité dans le fichier $fileListUsers par la nouvelle
+		newRepatriation=`echo $idRepatriation:$destinationFolder:$fileAdress`
+		echo $newRepatriation 
+		sed -i "s#${oldRepatriation}#${newRepatriation}#" ${fileListRepatriations}
+		
+		yad --center --width=400 \
+		--title="Change accepted" \
+		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+
+		
+		displayMenu
+}
+
 # Delete one or many repatriation(s) in Data/list_repatriations.txt
 function delRepatriation {
 	echo "delRepatriation function called"
