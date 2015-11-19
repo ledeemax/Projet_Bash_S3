@@ -172,32 +172,45 @@ function addStrategy {
 function modifyStrategy {
 	echo "modifyStrategy function called"
 	
-	listStrategies=$(cat ${fileListStrategies} | tr "\n" "," | sed "s/,$//")
+	#listStrategies=$(cat ${fileListStrategies} | tr "\n" "," | sed "s/,$//")
+	listStrategies=""
+	listPeriodicities=$(cat ${fileListPeriodicities} | cut -f 1 -d":" | tr "\n" "," | sed "s/,$//")
+	for oneStrategy in `cat ${fileListStrategies} | sort -t":" -k2`
+	do
+		local idStrategy=`echo $oneStrategy | cut -d":" -f1`
+		local idUser=`echo $oneStrategy | cut -d":" -f2`
+		local idRepatriation=`echo $oneStrategy | cut -d":" -f3`
+		local periodicity=`echo $oneStrategy | cut -d":" -f4`
+		local isToLog=`echo $oneStrategy | cut -d":" -f5`
+		local userInfo=`grep ^${idUser} ${fileListUsers} | cut -d":" -f 2-3`
+		local repatriationInfo=`grep ^${idRepatriation} ${fileListRepatriations} | cut -d":" -f 2-3`
+		listStrategies="$listStrategies,${idStrategy}:\t User : ${userInfo} : \n\t Repatriation : ${repatriationInfo} : \n\t Periodicity and to be logged :${periodicity}:${isToLog}"
+	done
 	strategyToModify=`yad --width=400 --height=215 --center --title="Modify strategy" --text="Please enter your changes:" --separator=":" \
 		--form --item-separator="," \
 		--field="Select strategy :":CB \
 		--field="New periodicity :":CB \
-		--text="Repatriation = id:destination_folder:file adress \n Value will not be changed for unfilled field." \
-		"${listStrategies}" "${listPeriodicities}"`
+		--field="To be logged? :":CB \
+		"${listStrategies}" ",${listPeriodicities}" ",yes,no" \
+		--text="Value will not be changed for unfilled field."`
 		
 		echo $strategyToModify
-		oldStrategy=`echo $strategyToModify | cut -d":" -f -3` 
-		echo $oldStrategy
-		idStrategy=`echo $strategyToModify | cut -c 1`
-		newPeriodicity=`echo $strategyToModify | cut -d"#" -f 2`
 		
-		if [ -z "$newPeriodicity" ]
-		then
-			echo "pas de valeurs dans periodicity"
-			periodicity=`echo $strategyToModify | cut -d":" -f 2`
-		else
-			periodicity=$newPeriodicity
-		fi
+		idStrategy=`echo $strategyToModify | cut -c 1`
+		oldPeriodicity=`echo $strategyToModify | cut -d":" -f 9`
+		newPeriodicity=`echo $strategyToModify | cut -d":" -f 11`
+		wasToLog=`echo $strategyToModify | cut -d":" -f 10`
+		isToLog=`echo $strategyToModify | cut -d":" -f 12`
+		
+		oldStrategy=`echo $idStrategy:$idUser:$idRepatriation:$oldPeriodicity:$wasToLog`
+		echo $oldStrategy
+		
+		newStrategy=`echo $idStrategy:$idUser:$idRepatriation:$newPeriodicity:$isToLog` 
+		echo $newStrategy
+
 		
 		# Remplacer ancienne identité dans le fichier $fileListUsers par la nouvelle
-		#newRepatriation=`echo $idRepatriation:$destinationFolder:$fileAdress`
-		#echo $newRepatriation 
-		#sed -i "s#${oldRepatriation}#${newRepatriation}#" ${fileListRepatriations}
+		sed -i "s/${oldStrategy}/${newStrategy}/" ${fileListStrategies}
 		
 		yad --center --width=400 \
 		--title="Change accepted" \
