@@ -117,8 +117,10 @@ function getData {
 	
 	local repatriationLine=`grep ^${idRepatriation}: ${fileListRepatriations}`
 	local destRepatriation=`echo ${repatriationLine} | cut -f 2 -d":"`
-	local sourceRepatriation=`echo ${repatriationLine} | cut -f 3 -d":"`
-	#local protocolRepatriation=`echo ${repatriationLine} | cut -f 4 -d":"`
+	local protocolRepatriation=`echo ${repatriationLine} | cut -f 3 -d":"`
+	local serverRepatriation=`echo ${repatriationLine} | cut -f 4 -d":"`
+	local remoteDirRepatriation=`echo ${repatriationLine} | cut -f 5 -d":"`
+	local remoteFilesRepatriation=`echo ${repatriationLine} | cut -f 6 -d":"`
 	
 	local userLine=`grep ^${idUser}: ${fileListUsers}`
 	local lastNameUser=`echo ${userLine} | cut -f 2 -d":"`
@@ -132,26 +134,32 @@ function getData {
 	echo -e "\t isToLog : $isToLog"
 	destRepatriation=Data/${destRepatriation}
 	echo -e "\t destRepatriation : $destRepatriation"
-	echo -e "\t sourceRepatriation : $sourceRepatriation"
-	#echo -e "\t protocolRepatriation : $protocolRepatriation"
+	echo -e "\t protocolRepatriation : $protocolRepatriation"
+	echo -e "\t serverRepatriation : $serverRepatriation"
+	echo -e "\t remoteDirRepatriation : $remoteDirRepatriation"
+	echo -e "\t remoteFilesRepatriation : $remoteFilesRepatriation"
 	echo -e "\t lastNameUser : $lastNameUser"
 	echo -e "\t firstNameUser : $firstNameUser"
 	echo -e "\t mailUser : $mailUser"
 
 	#echo -e "telechargement de : ${protocolRepatriation}://${sourceRepatriation} \n"
-	echo -e "telechargement de : ${sourceRepatriation} \n"
+	sourceRepat=${protocolRepatriation}://${serverRepatriation}/${remoteDirRepatriation}/${remoteFilesRepatriation}
+	echo -e "sourceRepat : ${sourceRepat} \n"
 
 	wget --timestamping \
 		--progress=bar \
 		--level=1 \
 		--append-output log_wget.tmp \
 		--directory-prefix ${destRepatriation} \
-		--no-remove-listing \
 		--tries=45 \
 		--no-parent \
-		--quota=1k \
-		${sourceRepatriation}
-		
+		${sourceRepat}
+
+		#--no-remove-listing \
+		#--quota=1k
+	status=$?
+	echo "status : $status \t $?"
+	
 #	if protocol == 'ftp' :
 #		FTPDownload(protocol, server, remote_dir)
 #	if protocol == 'http':
@@ -168,8 +176,11 @@ function getData {
 
 	if [ "$isToLog" == "yes" ] 
 	then
-		setLog $idUser $lastNameUser $firstNameUser $mailUser $destRepatriation $sourceRepatriation
+		echo "status : $status \t $?"
+		setLog "${idUser}" "${lastNameUser}" "${firstNameUser}" "${mailUser}" "${destRepatriation}" "${sourceRepatriation}" "${status}" "log_wget.tmp"
 	fi
+	#rm log_wget.tmp
+
 }
 
 # Check if file to download is not already present in local repertory.
@@ -186,11 +197,26 @@ function setLog {
 	local mailUser=$4
 	local destRepatriation=$5
 	local sourceRepatriation=$6
+	local status=$7
+	local logFileName=$8
 	
+	echo -e "\t logFileName : $logFileName"
+	echo -e "\t idUser : $idUser"
+	echo -e "\t lastNameUser : $lastNameUser"
+	echo -e "\t firstNameUser : $logFileName"
+	echo -e "\t mailUser : $mailUser"
+	echo -e "\t destRepatriation : $destRepatriation"
+	echo -e "\t sourceRepatriation : $sourceRepatriation"
+	echo -e "\t status : $status \t $?"
+
+	if [ -f ${logFileName} ]
+	then
+		tail -2 ${logFileName} #| head -1 
+	else
+		echo "Error : log file does not exist"
+	fi
 #		if (on a bien télécharger le fichier
 #			setLog() # réussie >> log
-#		else
-#			setLogéchec >> log
 
 #date:nom:prenom:email:destFile:sourcFile:RES
 
