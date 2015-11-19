@@ -79,12 +79,12 @@ function listRepatriations {
 	echo "listRepatriations function called"
 
 	local itemsRepatriations=()
-	while IFS=':' read -r idRepatriation destFolder SourceFile ; do
-		itemsRepatriations+=( "$idRepatriation" "$destFolder" "$SourceFile" )
+	while IFS=':' read -r idRepatriation destFolder protocol server remoteDir remoteFiles ; do
+		itemsRepatriations+=( "$idRepatriation" "$destFolder" "$protocol" "$server" "$remoteDir" "$remoteFiles" )
 	done < <(cat $fileListRepatriations)
 
 	yad --title="Automatized repatriation" --list --center --text="Display repatriation" --width=600 --height=300 \
-			--column="Id" --column="Destination folder" --column="Source file" \
+			--column="Id" --column="Destination folder" --column="Protocol" --column="Server" --column="Remote directory" --column="Remote files" \
 			"${itemsRepatriations[@]}" \
 			--button=Return
 	
@@ -95,17 +95,22 @@ function listRepatriations {
 # Add one repatriation in Data/list_repatriations.txt
 function addRepatriation {
 	echo "addRepatriation function called"
-	newRepatriation=`yad --title="Add a repatriation"--width=400 --title="" --center --text="Please enter your details:" --separator=":" \
+	newRepatriation=`yad --title="Add a repatriation" --width=900 --title="" --center --text="Please enter your details:" --separator=":" \
 		--form \
-		--field="Destination folder" \
-		--field="File adress"`
+		--field="Destination folders -> ./Data/" \
+		--field="Protocol ":CB \
+		--field="Server + Remote directory " \
+		--field="Remote files " \
+		"NCBI/Drosophila_melanogaster/" "ftp!http" "ftp.ncbi.nih.gov:/genomes/Drosophila_melanogaster/RELEASE_5_48/CHR_2/" "NT_033778.faa"`
 	getNewId
 	if ! [ -z "$newRepatriation" ]
 	then
 		chmod +w ${fileListRepatriations}
 		newDestinationFolder=`echo $newRepatriation | cut -d : -f 1`
-		newFileAdress=`echo $newRepatriation | cut -d : -f 2`
-		echo "$newId:$newDestinationFolder:$newFileAdress" >> $fileListRepatriations 
+		newProtocol=`echo $newRepatriation | cut -d : -f 2`
+		newServer_RemoteDir=`echo $newRepatriation | cut -d : -f 3`
+		newRemoteFiles=`echo $newRepatriation | cut -d : -f 4`
+		echo "$newId:$newDestinationFolder:$newProtocol:$newServer_RemoteDir:$newRemoteFiles" >> $fileListRepatriations 
 		echo "New Repatriation add"
 		yad --center --width=400 --title="What next?" --text "A new repatriation has been successfully added. \n You can now add a strategie. \n Click \"Validate\" to return to Main Menu."
 		exec ${scriptMain}
@@ -123,54 +128,82 @@ function getNewId {
 # Modify one repatriation
 function modifyRepatriation {
 	echo "modifyRepatriation function called"
-	
-	listRepatriations=$(cat ${fileListRepatriations} | tr "\n" "," | sed "s/,$//")
-	repatriationToModify=`yad --width=400 --height=215 --center --title="Modify repatriation" --text="Please enter your changes:" --separator="#" \
+
+	listRepatriations=""
+	for oneRepatriation in `cat ${fileListRepatriations}`
+	do
+		local idRepatriation=`echo $oneRepatriation | cut -d":" -f1`
+		local destination=`echo $oneRepatriation | cut -d":" -f2`
+		local protocol=`echo $oneRepatriation | cut -d":" -f3`
+		local server=`echo $oneRepatriation | cut -d":" -f4`
+		local remoteDir=`echo $oneRepatriation | cut -d":" -f5`
+		local remoteFiles=`echo $oneRepatriation | cut -d":" -f6`
+		listRepatriations="${listRepatriations},${idRepatriation}:\t Destination : ${destination} \n\t Protocol : ${protocol} \n\t Server/Remote directory : ${server}/${remoteDir} \n\t Remote files : ${remoteFiles}"
+	done
+	#listRepatriations=$(cat ${fileListRepatriations} | tr "\n" "," | sed "s/,$//")
+	repatriationToModify=`yad --width=400 --height=215 --center --title="Modify repatriation" --separator="#" \
+		--text="Please enter your changes:\n(Value will not be changed for unfilled field)" \
 		--form --item-separator="," \
 		--field="Select repatriation :":CB \
-		--field="New destination folder :" \
-		--field="New file adress :" \
-		--text="Repatriation = id:destination_folder:file adress \n Value will not be changed for unfilled field." \
-		"${listRepatriations}"`
+		--field="New destination :" \
+		--field="New protocol :":CB \
+		--field="New server + remote directory :" \
+		--field="New remote files :" \
+		"${listRepatriations}" "" ",ftp,http"`
 		
 		echo $repatriationToModify
 		oldRepatriation=`echo $repatriationToModify | cut -d"#" -f 1` 
-		echo $oldRepatriation
 		idRepatriation=`echo $repatriationToModify | cut -c 1`
 		newDestinationFolder=`echo $repatriationToModify | cut -d"#" -f 2`
-		echo $newDestinationFolder
-		newFileAdress=`echo $repatriationToModify | cut -d"#" -f 3`
-		echo $newFileAdress
+		newProtocol=`echo $repatriationToModify | cut -d"#" -f 3`
+		newServer_RemoteDir=`echo $repatriationToModify | cut -d"#" -f 4`
+		newRemoteFiles=`echo $repatriationToModify | cut -d"#" -f 5`
+		echo $oldRepatriation
+		echo "newDestinationFolder : $newDestinationFolder"
+		echo "newProtocol : $newProtocol"
+		echo "newServer_RemoteDir : $newServer_RemoteDir"
+		echo "newRemoteFiles : $newRemoteFiles"
+		newServer=`echo $newServer_RemoteDir | cut -d"/" -f 1`
+		newRemoteDir=`echo $newServer_RemoteDir | cut -d"/" -f 2-`
+		echo "newServer : $newServer"
+		echo "newRemoteDir : $newRemoteDir"
 		
 		if [ -z "$newDestinationFolder" ]
 		then
 			echo "pas de valeurs dans destination folder"
-			destinationFolder=`echo $repatriationToModify | cut -d":" -f 2`
-		else
-			destinationFolder=$newDestinationFolder
+			newDestinationFolder=`echo $repatriationToModify | cut -d":" -f 2`
 		fi
 
-
-		if [ -z "$newFileAdress" ]
+		if [ -z "$newProtocol" ]
 		then 
-			echo "pas de valeurs dans file adress"
-			fileAdress=`echo $repatriationToModify | cut -d":" -f 3`
-			fileAdress=`echo $fileAdress | cut -d"#" -f 1`
-		else
-			fileAdress=$newFileAdress
+			echo "pas de valeurs dans new Protocol"
+			newProtocol=`echo $repatriationToModify | cut -d":" -f 3`
 		fi
 		
-		# Remplacer ancienne identité dans le fichier $fileListUsers par la nouvelle
-		newRepatriation=`echo $idRepatriation:$destinationFolder:$fileAdress`
+		if [ -z "$newServer_RemoteDir" ]
+		then 
+			echo "pas de valeurs dans new Server + Remote Directory"
+			newServer=`echo $repatriationToModify | cut -d":" -f 4`
+			newRemoteDir=`echo $repatriationToModify | cut -d":" -f 5`
+		fi
+		
+		if [ -z "$newRemoteFiles" ]
+		then 
+			echo "pas de valeurs dans new Remote Files"
+			newRemoteFiles=`echo $repatriationToModify | cut -d":" -f 6`
+		fi
+
+		# Remplacer ancienne identité dans le fichier $fileListRepatriation par la nouvelle
+		newRepatriation=`echo ${idRepatriation}:${newDestinationFolder}:${newProtocol}:${newServer}:${newRemoteDir}:${newRemoteFiles}`
 		echo $newRepatriation 
 		sed -i "s#${oldRepatriation}#${newRepatriation}#" ${fileListRepatriations}
 		
 		yad --center --width=400 \
 		--title="Change accepted" \
 		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
-
 		
 		displayMenu
+		chmod 700 ${fileListRepatriations}
 }
 
 # Delete one or many repatriation(s) in Data/list_repatriations.txt
@@ -223,7 +256,11 @@ else
 			echo "Add a repatriation (call of addRepatriation function)"
 			addRepatriation
 			;;
-		3 | "--del" | "-d")
+		3 | "--modif" | "-m")
+			echo "Modify a repatriation (call of modifyRepatriation function)"
+			modifyRepatriation
+			;;
+		4 | "--del" | "-d")
 			echo "Delete a repatriation (call of delRepatriation function)"
 			delRepatriation
 			;;
