@@ -14,7 +14,8 @@ USAGE="Usage:\
 \t $0 \n\
 \t $0 [1] [--list] [-l] \n\
 \t $0 [2] [--add] [-a] \n\
-\t $0 [3] [--del] [-d] \n\
+\t $0 [3] [--modif] [-m] \n\
+\t $0 [4] [--del] [-d] \n\
 \t $0 [--help] [-h] \n\
 \t $0 [--version] [-v]"
 VERSION=1
@@ -41,8 +42,9 @@ function displayMenu {
 		--column="" --column="Repatriation menu" \
 		1 "Display list" \
 		2 "Add" \
-		3 "Delete"\
-		4 "Back to Main Menu"`
+		3 "Modify" \
+		4 "Delete"\
+		5 "Back to Main Menu"`
 		
 		case $choice in
 		1)
@@ -54,11 +56,15 @@ function displayMenu {
 			addRepatriation
 			;;
 		3)
-			echo "Choice 3 selected : Delete repatriation(s)"
+			echo "Choice 3 selected : Modify a repatriation"
+			addRepatriation
+			;;	
+		4)	
+			echo "Choice 4 selected : Delete repatriation(s)"
 			delRepatriation
 			;;
-		4)
-			echo "Choice 4 selected : Back to Main Menu"
+		5)
+			echo "Choice 5 selected : Back to Main Menu"
 			exec ${scriptMain} 
 			;;
 
