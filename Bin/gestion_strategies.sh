@@ -209,15 +209,21 @@ function modifyStrategy {
 		echo $newStrategy
 
 		
-		# Remplacer ancienne identité dans le fichier $fileListUsers par la nouvelle
-		sed -i "s/${oldStrategy}/${newStrategy}/" ${fileListStrategies}
-		
-		yad --center --width=400 \
-		--title="Change accepted" \
-		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
-
-		
-		displayMenu
+		# Remplacer ancienne identité dans le fichier $fileListStrategies par la nouvelle
+		if [ -z "$newPeriodicity" ] || [ -z "$isToLog"]
+		then 
+			yad --center --width=400 \
+			--title="No change made." \
+			--text="No change have been made. \n  Click \"Validate\" to return to Main Menu." 
+			displayMenu
+			
+		else
+			sed -i "s/${oldStrategy}/${newStrategy}/" ${fileListStrategies}
+			yad --center --width=400 \
+			--title="Change accepted" \
+			--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+			displayMenu
+		fi 
 }
 
 # Add a cron in crontab file
