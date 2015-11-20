@@ -30,12 +30,15 @@ ORGANISATION="Master Degree Bioinformatics - Rouen University"
 function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
+	mkdir -p ${DIR}"/Data" ${DIR}"/Log" ${DIR}"/Reports"
 	scriptGestionUsers=${DIR}"/Bin/gestion_users.sh"
 	scriptGestionRepatriations=${DIR}"/Bin/gestion_repatriations.sh"
 	scriptGestionStrategies=${DIR}"/Bin/gestion_strategies.sh"
 	fileListStrategies=${DIR}"/Data/list_strategies.txt"
 	fileListUsers=${DIR}"/Data/list_users.txt"
 	fileListRepatriations=${DIR}"/Data/list_repatriations.txt"
+	fileLog=${DIR}"/Log/get_data.log"
+	logFileTmp="log_wget.tmp"
 	# TODO :
 	# fileTexModel=
 	# fileHtmlModem=
@@ -144,28 +147,54 @@ function getData {
 
 	#echo -e "telechargement de : ${protocolRepatriation}://${sourceRepatriation} \n"
 	sourceRepat=${protocolRepatriation}://${serverRepatriation}/${remoteDirRepatriation}/${remoteFilesRepatriation}
-	echo -e "sourceRepat : ${sourceRepat} \n"
+	echo -e "\t sourceRepat : ${sourceRepat} \n"
 
-	wget --timestamping \
-		--progress=bar \
-		--level=1 \
-		--append-output log_wget.tmp \
-		--directory-prefix ${destRepatriation} \
-		--tries=45 \
-		--no-parent \
-		${sourceRepat}
-
-		#--no-remove-listing \
-		#--quota=1k
-	status=$?
-	echo "status : $status \t $?"
+	if [[ "$protocolRepatriation" == "ftp" ]]
+	then
+		echo "check ftp : OK"
+		wget --timestamping \
+			--progress=bar \
+			--level=1 \
+			--append-output ${logFileTmp} \
+			--directory-prefix ${destRepatriation} \
+			--tries=45 \
+			--no-parent \
+			${sourceRepat}
+			#--no-remove-listing \
+			#--quota=1k
+		status=$?
+		if [[ "$isToLog" == "yes" ]]
+		then
+			setLogFromWget ${idUser} ${lastNameUser} ${firstNameUser} ${mailUser} ${destRepatriation} ${sourceRepat} ${status}
+		fi
+	elif [[ "$protocolRepatriation" == "http" ]]
+	then
+		echo "check http : OK"
+		wget --timestamping \
+			--progress=bar \
+			--level=1 \
+			--append-output ${logFileTmp} \
+			--directory-prefix ${destRepatriation} \
+			--tries=45 \
+			--no-parent \
+			${sourceRepat}
+			#--no-remove-listing \
+			#--quota=1k
+		status=$?
+		if [[ "$isToLog" == "yes" ]]
+		then
+			setLogFromWget ${idUser} ${lastNameUser} ${firstNameUser} ${mailUser} ${destRepatriation} ${sourceRepat} ${status} ${remoteFilesRepatriation}
+		fi
+	elif [[ "$protocolRepatriation" == "local" ]]
+	then
+		echo ""
+	fi
 	
-#	if protocol == 'ftp' :
-#		FTPDownload(protocol, server, remote_dir)
-#	if protocol == 'http':
-#		HTTPDownload(protocol, server, remote_dir, self.bank.config)
-#	if protocol == 'local':
-#		dLocalDownload(remote_dir)
+	if [ -f ${logFileTmp} ]
+	then
+		rm ${logFileTmp}
+	fi
+
 
 #	isRecent= checkFileIsRecent()
 #
@@ -174,12 +203,6 @@ function getData {
 #		wget ftp...fichier.fq
 #	}
 
-	if [ "$isToLog" == "yes" ] 
-	then
-		echo "status : $status \t $?"
-		setLog "${idUser}" "${lastNameUser}" "${firstNameUser}" "${mailUser}" "${destRepatriation}" "${sourceRepatriation}" "${status}" "log_wget.tmp"
-	fi
-	#rm log_wget.tmp
 
 }
 
@@ -189,7 +212,7 @@ function checkLastFile {
 }
 
 # Generate/update a log file.
-function setLog {
+function setLogFromWget {
 	echo "setLog function called"
 	local idUser=$1
 	local lastNameUser=$2
@@ -198,25 +221,90 @@ function setLog {
 	local destRepatriation=$5
 	local sourceRepatriation=$6
 	local status=$7
-	local logFileName=$8
+	local remoteFilesRepatriation=$8
 	
-	echo -e "\t logFileName : $logFileName"
 	echo -e "\t idUser : $idUser"
 	echo -e "\t lastNameUser : $lastNameUser"
-	echo -e "\t firstNameUser : $logFileName"
+	echo -e "\t firstNameUser : $firstNameUser"
 	echo -e "\t mailUser : $mailUser"
 	echo -e "\t destRepatriation : $destRepatriation"
 	echo -e "\t sourceRepatriation : $sourceRepatriation"
-	echo -e "\t status : $status \t $?"
+	echo -e "\t remoteFilesRepatriation : $remoteFilesRepatriation"
+	echo -e "\t status : $status"
 
-	if [ -f ${logFileName} ]
+	if [ -f ${logFileTmp} ]
 	then
-		tail -2 ${logFileName} #| head -1 
+		wgetLog=`tail -3 ${logFileTmp}`
+		echo -e "wgetLog = $wgetLog \n"
+		case ${status} in
+			# No problems occurred :
+			"0")
+				#taille=`stat -c%s ${destRepatriation}/${remoteFilesRepatriation}`
+				#taille=`du -h ${destRepatriation}/${remoteFilesRepatriation} | cut -d"\t" -f1`
+				#taille=`du -h Data/IMAGES/googlelogo_color_272x92dp.png `
+				taille="12"
+				#echo "taille = $taille"
+				if [[ ! -z `echo ${wgetLog} | grep "enregistré"` ]]
+				then
+					echo "Status : 0 (No problems occurred)"
+					RES="téléchargement réussie (${taille})"
+				elif [[ ! -z `echo ${wgetLog} | grep "pas plus récent que le fichier local"` ]]
+				then
+					echo "Status : 0 (No problems occurred) but Fichier distant pas plus récent que le fichier local"
+					RES="Fichier distant pas plus récent que le fichier local"
+				fi
+				;;
+			# Generic error code :
+			"1")
+				echo "Status : 1 (Generic error code)"
+				RES="Generic error code"
+				;;
+			# Parse error—for instance :
+			"2")
+				echo "Status : 2 (Parse error—for instance, when parsing command-line options, the ‘.wgetrc’ or ‘.netrc’...)"
+				RES="Parse error—for instance"
+				;;
+			# File I/O error :
+			"3")
+				echo "Status : 3 (File I/O error)"
+				RES="File I/O error"
+				;;
+			# Network failure :
+			"4")
+				echo "Status : 4 (Network failure)"
+				RES="Network failure"
+				;;
+			# SSL verification failure :
+			"5")
+				echo "Status : 5 (SSL verification failure)"
+				RES="SSL verification failure"
+				;;
+			# Username/password authentication failure :
+			"6")
+				echo "Status : 6 (Username/password authentication failure)"
+				RES="Username/password authentication failure"
+				;;
+			# Protocol errors :
+			"7")
+				echo "Status : 7 (Protocol errors)"
+				RES="Protocol errors"
+				;;
+			# Server issued an error response
+			"8")
+				echo "Status : 8 (Server issued an error response). Répertoire ou Fichier source inexistant"
+				RES="Server issued an error response (Répertoire ou Fichier source inexistant)"
+				;;
+			*)
+				echo "Status : > 8 (Others errors)"
+				RES="Others errors"
+				;;
+		esac
 	else
 		echo "Error : log file does not exist"
 	fi
-#		if (on a bien télécharger le fichier
-#			setLog() # réussie >> log
+ 
+	date=`date`
+	echo "$date;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$sourceRepatriation;$RES" >> ${fileLog}
 
 #date:nom:prenom:email:destFile:sourcFile:RES
 
