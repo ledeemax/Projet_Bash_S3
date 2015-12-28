@@ -39,7 +39,7 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=250 \
+	choice=`zenity --list --title="USER MENU" --text="Select a choice :" --width=320 --height=250 \
 		--column="" --column="User menu" \
 		1 "Display list" \
 		2 "Add" \
@@ -71,6 +71,7 @@ function displayMenu {
 
 		*)
 			echo "Canceled"
+			exec ${scriptMain}
 			;;
 	esac
 }
@@ -169,7 +170,7 @@ function modifyUser {
 		else
 			email=$newMail
 		fi
-		# Remplacer ancienen identité dans le fichier $fileListUsers par la nouvelle
+		# Remplacer ancienne identité dans le fichier $fileListUsers par la nouvelle
 		newIdentity=`echo $idUser:$lastName:$firstName:$email`
 		echo $newIdentity
 		echo $oldIdentity 
@@ -203,9 +204,9 @@ function delUser {
 				echo "Removing of user : ${user}"
 				sed -i "/${user}/d" ${fileListUsers}
 				chmod +w ${fileListUsers}
+				yad --center --width=400 --title="User deleted" --text "User(s) has been successfully deleted. \n Click \"Validate\" to return to the Main Menu." 
 			fi
 		done
-		yad --center --width=400 --title="User deleted" --text "User(s) has been successfully deleted. \n Click \"Validate\" to return to the Main Menu." 
 		exec ${scriptMain}
 	else
 		yad --center --width=400 --title="No user deleted" --text "No user deleted. \n Click \"Validate\" to return to User Menu." 
