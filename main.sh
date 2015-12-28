@@ -84,8 +84,22 @@ function displayMainMenu {
 }
 
 # Display the menu to generate a report based on a user and/or a period.
-function displayMenuGeneratedReport {
-	echo "displayMenuGeneratedReport function called"
+function displayMenuGenerationReport {
+	echo "displayMenuGenerationReport function called"
+
+	listUsers=$(cat ${fileListUsers} | tr "\n" "," | sed "s/,$//")
+
+	generateReport=`yad --width=400 --center --title="Generate Report" --text="Please choose which report you want to generate: you can select one user and/or a duration." \
+	--form --item-separator="," \
+	--field="Select user :":CB \
+	--field="And":CHK \
+	--field="Or":CHK \
+	--field="Choose a duration : begin":DT \
+	--field="Choose a duration : end":DT \
+	",${listUsers}" `
+
+	echo $generateReport
+	#TODO : impossible de mettre une date de fin antérieur à la date de début
 }
 
 # Generate a report based on a user and/or a period.
