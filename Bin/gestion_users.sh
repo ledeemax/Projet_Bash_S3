@@ -39,7 +39,7 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="USER MENU" --text="Select a choice :" --width=320 --height=250 \
+	choice=`zenity --list --title="User Menu" --text="Select a choice :" --width=320 --height=250 \
 		--column="" --column="User menu" \
 		1 "Display list" \
 		2 "Add" \
@@ -98,13 +98,14 @@ function listUsers {
 function addUser {
 	chmod +w $fileListUsers
 	echo "addUser function called"
-	newUser=`yad --center --width=400 --title="" --text="Please enter your details:" --separator=":" \
+	newUser=`yad --center --width=400 --title="Add a user" --text="Please enter your details:" --separator=":" \
 		--form \
 		--field="Last name" \
 		--field="First name" \
 		--field="email adresse"`
 	getNewId
-	if ! [ -z "$newUser" ]
+	echo $newUser
+	if ! [[ "$newUser" == ":::" ]]
 	then
 		lastName=`echo $newUser | sed "s/ /_/g" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
 		firstName=`echo $newUser | cut -d : -f 2` 
@@ -113,7 +114,7 @@ function addUser {
 		yad --center --width=400 --title="What next?" --text "A new user has been successfully added. \n You can now add a repatriation or a strategy :) " 
 		exec ${scriptMain}
 	else
-		yad --center --width=400 --title="No new user add" --text "No user added. \n Click \"Validate\" to return to User Menu." 
+		yad --center --image=”/../images/attention.png”--width=400 --title="No new user added" --text "No user added. \n Click \"Validate\" to return to User Menu." 
 		displayMenu
 	fi
 }
@@ -137,13 +138,15 @@ function modifyUser {
 		--text="Value will not be changed for unfilled field." \
 		"${listUsers}"`
 
-		#echo $userToModify
-		oldIdentity=`echo $userToModify | cut -d":" -f -5 | sed "s/.$//"`
+		echo $userToModify
+		oldIdentity=`echo $userToModify | cut -d":" -f -4` #| sed "s/.$//"`
 		echo $oldIdentity
 		idUser=`echo $userToModify | cut -c 1`
 		newLastName=`echo $userToModify | cut -d":" -f 5`
+		echo $newLastName
 		newFirstName=`echo $userToModify | cut -d":" -f 6`
 		newMail=`echo $userToModify | cut -d":" -f 7`
+		echo $newMail
 		
 		if [ -z "$newLastName" ]
 		then
@@ -174,14 +177,19 @@ function modifyUser {
 		newIdentity=`echo $idUser:$lastName:$firstName:$email`
 		echo $newIdentity
 		echo $oldIdentity 
-		sed -i "s/${oldIdentity}/${newIdentity}/" ${fileListUsers}
 		
-		yad --center --width=400 \
-		--title="Change accepted" \
-		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+		if [[ "$newIdentity" == "$oldIdentity" ]]
+		then
+			yad --center --width=400 --title="No modification" --text "No modification has been taken into account. \n Click \"Validate\" to return to User Menu." 
+			displayMenu
 
-		
-		displayMenu
+		else
+			sed -i "s/${oldIdentity}/${newIdentity}/" ${fileListUsers}
+			yad --center --width=400 \
+			--title="Change accepted" \
+			--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+		fi
+		exec ${scriptMain}
 }
 
 # Delete one or many user(s) in Data/list_users.txt
