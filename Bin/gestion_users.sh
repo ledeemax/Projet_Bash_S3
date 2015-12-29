@@ -124,6 +124,23 @@ function getNewId {
 	newId=$(($lastId+1))
 }
 
+# List editable the users contained in ../Data/list_users.txt file
+# Cette fonction ne permet pas de mettre a jour plusieurs tuples en meme temps
+# Usage: Modifier les valeurs -> Selectionner la ligne a editer -> puis valider
+function modifyUserV2 {
+	echo "modifyUserV1 function called"
+
+	local itemsUsers=()
+	while IFS=':' read -r idUser firstName lastName mail ; do
+		itemsUsers+=( "$idUser" "$firstName" "$lastName" "$mail" )
+	done < <(cat $fileListUsers)
+
+	userToModify=`yad --text="Display users" --list --editable --center --width=600 --height=300 \
+			--column="IdUser" --column="First name" --column="Last name" --column="Mail" \
+			"${itemsUsers[@]}" `
+	echo $userToModify
+}
+
 # Modify one user
 function modifyUser {
 	echo "modifyUser function called"
@@ -138,6 +155,10 @@ function modifyUser {
 		--text="Value will not be changed for unfilled field." \
 		"${listUsers}"`
 
+	if [ -z "$userToModify" ]
+	then
+		yad --center --width=400 --title="No modification" --text "No modification has been taken into account. \n Click \"Validate\" to return to User Menu." 
+	else
 		echo $userToModify
 		oldIdentity=`echo $userToModify | cut -d":" -f -4` #| sed "s/.$//"`
 		echo $oldIdentity
@@ -147,7 +168,7 @@ function modifyUser {
 		newFirstName=`echo $userToModify | cut -d":" -f 6`
 		newMail=`echo $userToModify | cut -d":" -f 7`
 		echo $newMail
-		
+
 		if [ -z "$newLastName" ]
 		then
 			echo "pas de valeurs dans last name"
@@ -156,7 +177,6 @@ function modifyUser {
 			lastName=$newLastName
 		fi
 
-
 		if [ -z "$newFirstName" ]
 		then 
 			echo "pas de valeurs dans first name"
@@ -164,8 +184,7 @@ function modifyUser {
 		else
 			firstName=$newFirstName
 		fi
-		
-		
+
 		if [ -z "$newMail" ]
 		then 
 			echo "pas de valeurs dans mail"
@@ -177,19 +196,18 @@ function modifyUser {
 		newIdentity=`echo $idUser:$lastName:$firstName:$email`
 		echo $newIdentity
 		echo $oldIdentity 
-		
+
 		if [[ "$newIdentity" == "$oldIdentity" ]]
 		then
 			yad --center --width=400 --title="No modification" --text "No modification has been taken into account. \n Click \"Validate\" to return to User Menu." 
-			displayMenu
-
 		else
 			sed -i "s/${oldIdentity}/${newIdentity}/" ${fileListUsers}
 			yad --center --width=400 \
-			--title="Change accepted" \
-			--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
+				--title="Change accepted" \
+				--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
 		fi
-		exec ${scriptMain}
+	fi
+	displayMenu
 }
 
 # Delete one or many user(s) in Data/list_users.txt
