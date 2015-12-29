@@ -105,17 +105,18 @@ function displayMenuGenerationReport {
 # Generate a report based on a user and/or a period.
 # Arguments: a user, a period (the beginning and the end), a type of report (website, document or slide).
 # TODO: generate a model (html or tex).
+# TODO: mettre un lien symbolique cliquable pour la var $destFile
 function generateReport {
 	echo "generateReport function called"
 }
 
 # Perform the repatriation
 # Argument: Strategy ID's
-# TODO: plusieurs facons pour vérifier et tester un rapatriement
+# Notes personnelles: plusieurs facons pour vérifier et tester un rapatriement
 #			1/	ftp .... << BYEBYE
 #					newer
 #				BYEBYE
-#			2/  rsync
+#			2/      rsync
 #			3/	mirror.pl
 function getData {
 	echo "getData function called"
@@ -209,15 +210,12 @@ function getData {
 		rm ${logFileTmp}
 	fi
 
-
-#	isRecent= checkFileIsRecent()
-#
-#	if (! isRecent)
-#	{
-#		wget ftp...fichier.fq
-#	}
-
-
+	#	isRecent= checkFileIsRecent()
+	#
+	#	if (! isRecent)
+	#	{
+	#		wget ftp...fichier.fq
+	#	}
 }
 
 # Check if file to download is not already present in local repertory.
@@ -226,6 +224,18 @@ function checkLastFile {
 }
 
 # Generate/update a log file.
+# La variable $RES peut prendre differentes valeurs (https://gist.github.com/cosimo/5747881) :
+#  - Téléchargement réussie (${taille})
+#  - Fichier distant pas plus récent que le fichier local
+#  - Generic error code
+#  - Parse error—for instance
+#  - File I/O error
+#  - Network failure
+#  - SSL verification failure
+#  - Username/password authentication failure
+#  - Protocol errors
+#  - Server issued an error response (Répertoire ou Fichier source inexistant)
+#  - Others errors
 function setLogFromWget {
 	echo "setLog function called"
 	local idUser=$1
@@ -253,15 +263,12 @@ function setLogFromWget {
 		case ${status} in
 			# No problems occurred :
 			"0")
-				#taille=`stat -c%s ${destRepatriation}/${remoteFilesRepatriation}`
-				#taille=`du -h ${destRepatriation}/${remoteFilesRepatriation} | cut -d"\t" -f1`
-				#taille=`du -h Data/IMAGES/googlelogo_color_272x92dp.png `
-				taille="12"
-				#echo "taille = $taille"
+				taille=`du -h ${destRepatriation}/${remoteFilesRepatriation} | cut -d$'\t' -f1`
+				echo "taille = $taille"
 				if [[ ! -z `echo ${wgetLog} | grep "enregistré"` ]]
 				then
 					echo "Status : 0 (No problems occurred)"
-					RES="téléchargement réussie (${taille})"
+					RES="Téléchargement réussie (${taille})"
 				elif [[ ! -z `echo ${wgetLog} | grep "pas plus récent que le fichier local"` ]]
 				then
 					echo "Status : 0 (No problems occurred) but Fichier distant pas plus récent que le fichier local"
@@ -317,19 +324,8 @@ function setLogFromWget {
 		echo "Error : log file does not exist"
 	fi
  
-	date=`date`
+	date=`date "+%Y/%m/%d %H:%M:%S"`
 	echo "$date;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$sourceRepatriation;$RES" >> ${fileLog}
-
-#date:nom:prenom:email:destFile:sourcFile:RES
-
-#RES:
-#- téléchargement réussie (taille)
-#- fichier source non disponible
-#- fichier récent déjà présent en local
-#- échec lors du téléchargement
-#- espace de stockage insuffisant
-
-#destFile: TODO lors du rapport, mettre un lien symbolique cliquable
 }
 
 
