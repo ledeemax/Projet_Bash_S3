@@ -89,17 +89,15 @@ function displayMenuGenerationReport {
 
 	listUsers=$(cat ${fileListUsers} | tr "\n" "," | sed "s/,$//")
 
-	generateReport=`yad --width=400 --center --title="Generate Report" --text="Please choose which report you want to generate: you can select one user and/or a duration." \
+	generateReport=`yad --width=400 --center --title="Generate Report" --text="Please choose which report you want to generate: You can select one or all users. The start and end dates are optional." \
 	--form --item-separator="," \
 	--field="Select user :":CB \
-	--field="AND / OR :":CB \
-	--field="Choose a duration : begin":DT \
-	--field="Choose a duration : end":DT \
-	--field="Select a format of report (mandatory) :":CB \
-	",${listUsers}" "OR,AND" "" "" "Website,Document,Slides" `
+	--field="Choose a start date (Optional)":DT \
+	--field="Choose an end date (Optional)":DT \
+	--field="Select a format of report :":CB \
+	"All the users,${listUsers}" "" "" "Document,Website,Slides" `
 
 	echo $generateReport
-	#TODO : impossible de mettre une date de fin antérieur à la date de début
 }
 
 # Generate a report based on a user and/or a period.
