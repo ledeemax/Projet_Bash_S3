@@ -92,11 +92,10 @@ function displayMenuGenerationReport {
 	generateReport=`yad --width=400 --center --title="Generate Report" --text="Please choose which report you want to generate: you can select one user and/or a duration." \
 	--form --item-separator="," \
 	--field="Select user :":CB \
-	--field="And":CHK \
-	--field="Or":CHK \
+	--field="AND / OR :":CB \
 	--field="Choose a duration : begin":DT \
 	--field="Choose a duration : end":DT \
-	",${listUsers}" `
+	",${listUsers}" "AND,OR" `
 
 	echo $generateReport
 	#TODO : impossible de mettre une date de fin antérieur à la date de début
