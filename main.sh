@@ -95,7 +95,8 @@ function displayMenuGenerationReport {
 	--field="AND / OR :":CB \
 	--field="Choose a duration : begin":DT \
 	--field="Choose a duration : end":DT \
-	",${listUsers}" "AND,OR" `
+	--field="Select a format of report (mandatory) :":CB \
+	",${listUsers}" "OR,AND" "" "" "Website,Document,Slides" `
 
 	echo $generateReport
 	#TODO : impossible de mettre une date de fin antérieur à la date de début
