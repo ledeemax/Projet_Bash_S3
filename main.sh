@@ -263,68 +263,68 @@ function setLogFromWget {
 		case ${status} in
 			# No problems occurred :
 			"0")
-				taille=`du -h ${destRepatriation}/${remoteFilesRepatriation} | cut -d$'\t' -f1`
+				taille=`du -b ${destRepatriation}/${remoteFilesRepatriation} | cut -d$'\t' -f1`		# en bytes
 				echo "taille = $taille"
 				if [[ ! -z `echo ${wgetLog} | grep "enregistré"` ]]
 				then
 					echo "Status : 0 (No problems occurred)"
-					RES="Téléchargement réussie (${taille})"
+					RES="0:Téléchargement réussie:${taille}"
 				elif [[ ! -z `echo ${wgetLog} | grep "pas plus récent que le fichier local"` ]]
 				then
 					echo "Status : 0 (No problems occurred) but Fichier distant pas plus récent que le fichier local"
-					RES="Fichier distant pas plus récent que le fichier local"
+					RES="0:Fichier distant pas plus récent que le fichier local:0"
 				fi
 				;;
 			# Generic error code :
 			"1")
 				echo "Status : 1 (Generic error code)"
-				RES="Generic error code"
+				RES="1:Generic error code:0"
 				;;
 			# Parse error—for instance :
 			"2")
 				echo "Status : 2 (Parse error—for instance, when parsing command-line options, the ‘.wgetrc’ or ‘.netrc’...)"
-				RES="Parse error—for instance"
+				RES="2:Parse error—for instance:0"
 				;;
 			# File I/O error :
 			"3")
 				echo "Status : 3 (File I/O error)"
-				RES="File I/O error"
+				RES="3:File I/O error:0"
 				;;
 			# Network failure :
 			"4")
 				echo "Status : 4 (Network failure)"
-				RES="Network failure"
+				RES="4:Network failure:0"
 				;;
 			# SSL verification failure :
 			"5")
 				echo "Status : 5 (SSL verification failure)"
-				RES="SSL verification failure"
+				RES="5:SSL verification failure:0"
 				;;
 			# Username/password authentication failure :
 			"6")
 				echo "Status : 6 (Username/password authentication failure)"
-				RES="Username/password authentication failure"
+				RES="6:Username/password authentication failure:0"
 				;;
 			# Protocol errors :
 			"7")
 				echo "Status : 7 (Protocol errors)"
-				RES="Protocol errors"
+				RES="7:Protocol errors:0"
 				;;
 			# Server issued an error response
 			"8")
 				echo "Status : 8 (Server issued an error response). Répertoire ou Fichier source inexistant"
-				RES="Server issued an error response (Répertoire ou Fichier source inexistant)"
+				RES="8:Server issued an error response (Répertoire ou Fichier source inexistant):0"
 				;;
 			*)
 				echo "Status : > 8 (Others errors)"
-				RES="Others errors"
+				RES="9:Others errors:0"
 				;;
 		esac
 	else
 		echo "Error : log file does not exist"
 	fi
- 
-	date=`date "+%Y/%m/%d %H:%M:%S"`
+
+	date=`date "+%d/%m/%Y %H:%M:%S"`
 	echo "$date;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$sourceRepatriation;$RES" >> ${fileLog}
 }
 
