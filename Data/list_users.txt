@@ -1,3 +1,7 @@
-1:LEDEE:Maxime:ledee.maxime@gmail.com
-2:LEVON:Stephanie:levon.stephanie@gmail.com
-3:NOEL:Père:nono@hotmail.fr
+1:LEDEE:Maxime:ledeemax@github.com
+2:LEVON:Stephanie:stephanielevon@github.com
+3:NOEL:Père:nono@peace.org
+4:LORBER:Nica:flaky@htf.net
+5:NAVARRO:Kenn:cuddles@htf.net
+6:WINN:David:lumpy@htf.net
+7:LIPMAN:Michael:nutty@htf.net
