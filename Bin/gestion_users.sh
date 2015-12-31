@@ -240,7 +240,18 @@ function delUser {
 	fi
 }
 
-
+function getName {
+	echo "getName function called"
+	local idUser=$1
+	local userLine=`grep ^${idUser}: ${fileListUsers} | cut -f 2 -d":"`
+	if [ -z "${userLine}" ]
+	then
+		userName="UNKNOWN"
+	else
+		userName=`echo ${userLine} | cut -f 2 -d":"`
+	fi
+	echo ${userName}
+}
 
 
 ########################
@@ -276,6 +287,23 @@ else
 			;;
 		"-v" | "--version")
 			echo -e "VERSION: ${VERSION}\nAUTHORS: ${AUTHORS}\nORGANISATION: ${ORGANISATION}"
+			exit 1
+			;;
+		"--get-name")
+			if [ -z "$2" ]
+			then
+				echo "ERROR : missing argument"
+				echo "UNKNOWN"
+				exit 1
+			elif ! [[ "$2" =~ ^[0-9]+$ ]]
+			then
+				echo "ERROR : second parameter ($2) must be a number"
+				echo "UNKNOWN"
+				exit 1
+			else
+				echo "Get name from user id's (call of getName function)"
+				getName $2
+			fi
 			exit 1
 			;;
 		*)
