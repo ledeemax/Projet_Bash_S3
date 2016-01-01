@@ -10,13 +10,15 @@
 #################################
 #    Initialisation (CONSTANTES)
 #################################
-USAGE="Usage:\
+USAGE="Usage settings :\
 \t $0 \n\
 \t $0 [1] [--users] \n\
 \t $0 [2] [--repatriations] \n\
 \t $0 [3] [--strategies] \n\
 \t $0 [4] [--report] \n\
-\t $0 [--help] [-h]"
+\t $0 [--help] [-h] \n\
+\t $0 [--version] [-v] \n\
+\t $0 [--get-data] (idStrategie)"
 VERSION=1
 AUTHORS="Stéphanie LEVON & Maxime LEDEE"
 ORGANISATION="Master Degree Bioinformatics - Rouen University"
