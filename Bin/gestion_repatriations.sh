@@ -31,6 +31,7 @@ ORGANISATION="Master Degree Bioinformatics - Rouen University"
 function init {
 	echo "init function called"
 	DIR="$( cd "$( dirname "${0}" )" && pwd )"
+	scriptMain=${DIR}"/../main.sh"
 	fileListRepatriations=${DIR}"/../Data/list_repatriations.txt"
 	fileListStrategies=${DIR}"/../Data/list_strategies.txt"
 }
@@ -38,7 +39,7 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="Automatized repatriation" --text="Select a choice :" --width=320 --height=215 \
+	choice=`zenity --list --title="Automatized repatriation" --text="Select a choice :" --width=320 --height=240 \
 		--column="" --column="Repatriation menu" \
 		1 "Display list" \
 		2 "Add" \
@@ -202,7 +203,7 @@ function modifyRepatriation {
 		--title="Change accepted" \
 		--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
 		
-		displayMenu
+		exec ${scriptMain}
 		chmod 700 ${fileListRepatriations}
 }
 
@@ -212,7 +213,7 @@ function delRepatriation {
 	local listRepatriationsToDel=`zenity --list --checklist --separator=" " --text="Select repatriation(s) to delete :" --width=500 --height=300\
 			--column="" --column="Repatriations" \
 			$(sed s/^/FALSE\ / ${fileListRepatriations})`
-	if ! [ -z "$newRepatriation" ]
+	if ! [ -z "$listRepatriationsToDel" ]
 	then
 		for repatriation in `echo $listRepatriationsToDel`
 		do

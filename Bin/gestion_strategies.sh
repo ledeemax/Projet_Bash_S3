@@ -41,7 +41,7 @@ function init {
 # Display the menu. 3 choices are available.
 function displayMenu {
 	echo "displayMenu function called"
-	choice=`zenity --list --title="Main menu" --text="Select a choice :" --width=320 --height=215 \
+	choice=`zenity --list --title="Strategy menu" --text="Select a choice :" --width=320 --height=240 \
 		--column="" --column="Strategy menu" \
 		1 "Display list" \
 		2 "Add" \
@@ -135,6 +135,7 @@ function addStrategy {
 		--field="Select periodicity :":CB \
 		--field="will be logged ?":CB \
 		"${listUsers}" "${listRepatriations}" "${listPeriodicities}"  "yes,no"`
+	echo $strategyToAdd
 
 	if [ "${strategyToAdd}" == "" ]
 	then
@@ -186,7 +187,7 @@ function modifyStrategy {
 		local repatriationInfo=`grep ^${idRepatriation} ${fileListRepatriations} | cut -d":" -f 2-3`
 		listStrategies="$listStrategies,${idStrategy}:\t User : ${userInfo} : \n\t Repatriation : ${repatriationInfo} : \n\t Periodicity and to be logged :${periodicity}:${isToLog}"
 	done
-	strategyToModify=`yad --width=400 --height=215 --center --title="Modify strategy" --text="Please enter your changes:" --separator=":" \
+	strategyToModify=`yad --width=400 --height=215 --center --title="Modify strategy" --text="Please enter your changes: (Thank you for filling out all fields)" --separator=":" \
 		--form --item-separator="," \
 		--field="Select strategy :":CB \
 		--field="New periodicity :":CB \
@@ -214,7 +215,7 @@ function modifyStrategy {
 		then 
 			yad --center --width=400 \
 			--title="No change made." \
-			--text="No change have been made. \n  Click \"Validate\" to return to Main Menu." 
+			--text="No change have been made. \n  Click \"Validate\" to return to Strategy Menu." 
 			displayMenu
 			
 		else

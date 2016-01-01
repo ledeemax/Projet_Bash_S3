@@ -104,8 +104,7 @@ function addUser {
 		--field="First name" \
 		--field="email adresse"`
 	getNewId
-	echo $newUser
-	if ! [[ "$newUser" == ":::" ]]
+	if ! [[ "$newUser" == ":::" ]] 
 	then
 		lastName=`echo $newUser | sed "s/ /_/g" | cut -d : -f 1 | tr [a-z] [A-Z]` # Formate le nom de famille en majuscule, remplace les éventuels espaces par "_"
 		firstName=`echo $newUser | cut -d : -f 2` 
@@ -200,12 +199,14 @@ function modifyUser {
 		if [[ "$newIdentity" == "$oldIdentity" ]]
 		then
 			yad --center --width=400 --title="No modification" --text "No modification has been taken into account. \n Click \"Validate\" to return to User Menu." 
+			displayMenu
 		else
 			sed -i "s/${oldIdentity}/${newIdentity}/" ${fileListUsers}
 			yad --center --width=400 \
 				--title="Change accepted" \
 				--text="Your change has been taken into account. \n  Click \"Validate\" to return to Main Menu." 
 		fi
+		exec ${scriptMain}
 	fi
 	displayMenu
 }
