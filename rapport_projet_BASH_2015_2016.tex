@@ -84,7 +84,7 @@
 	
 		\subsubsection{Bin/gestion\_repatriations.sh}
 			\begin{itemize}
-				\item init: initialise les variables, notamment le fichier DATA\/list\_repatriations.txt
+				\item init: initialise les variables, notamment le fichier DATA/list\_repatriations.txt
 				\item displayMenu: affiche le menu "Rapatriements"
 				\item listRepatriations: affiche la liste des rapatriements existants
 				\item addRepatriation: ajoute un rapatriement avec les champs: Répertoire de destination, adresse du fichier à rapatrier
@@ -94,7 +94,7 @@
 	
 		\subsubsection{Bin/gestion\_strategies.sh}
 			\begin{itemize}
-				\item init: initialise les variables, notamment le fichier DATA\/list\_strategies.txt
+				\item init: initialise les variables, notamment le fichier DATA/list\_strategies.txt
 				\item displayMenu: affiche le menu "Stratégies"
 				\item listStrategy: affiche la liste des stratégies existantes
 				\item addStrategy: ajoute une stratégie avec les champs: Utilisateur, source du fichier à rapatrier et choix de la periodicité. Cette interface propose également à l'utilisateur de garder une trace du rapatriement ou non (log). 
@@ -145,9 +145,12 @@
 	La génération d'un rapport nécessite :
 	\begin{itemize}
 		\item le fichier "Log/get\_date.log"
-		\item au moins un critère de recherche
-		\item et des modèles LaTeX au format .tex . Ces fichiers sont situés dans un répertoire caché "Reports/.model/Document"
+		\item l'identifiant d'un utilisateur ou le mot clef "ALL"
+		\item des modèles LaTeX au format .tex . Ces fichiers sont situés dans un répertoire caché "Reports/.model/Document"
+		\item et le paquet pgf-pie.sty qui est aussi stocké dans Reports/.model/Document . Ce paquet est automatiquement copié dans le répertoire $\sim$/texmf/tex/latex/local/
 	\end{itemize}
+	Le nom du rapport produit prend la forme suivante : USER\_date-début\_date-fin.pdf. \\ 
+	Exemples : ALL\_17-12-2015\_01-01-2016.pdf ou Maxime\_17-12-2015\_01-01-2016.pdf
 
 %------------------
 %	SECTION 5
