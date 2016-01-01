@@ -119,7 +119,7 @@ function displayMenuGenerationReport {
 # Arguments: a user, a period (the beginning and the end), a type of report (website, document or slide).
 # TODO: mettre un lien symbolique cliquable pour la var $destFile
 # Rappel format d'un log :
-# $date;$idUser;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$sourceRepatriation;$idStatus:$status:$taille
+# $date;$idUser;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$protoc;$sourceRepatriation;$idStatus;$status;$taille
 function generateReport {
 	echo "generateReport function called"
 	local listIdUser=$1
@@ -134,9 +134,11 @@ function generateReport {
 	########
 	# Init #
 	########
-	
+		
 	mkdir ${dir_tmpReport}
-	cp ${dir_modelReport}/${typeReport}/*.tex ${dir_tmpReport}/
+	cp ${dir_modelReport}/${typeReport}/* ${dir_tmpReport}/
+	mkdir -p ~/texmf/tex/latex/local/
+	cp ${dir_tmpReport}/pgf-pie.sty ~/texmf/tex/latex/local/
 	tex_modelStart="${dir_tmpReport}/model_start.tex"
 	tex_modelSummaryForALLuser="${dir_tmpReport}/model_summaryForALLuser.tex"
 	tex_modelOneUser="${dir_tmpReport}/model_oneUser.tex"
@@ -165,6 +167,19 @@ function generateReport {
 	for currentIdUser in ${listIdUser[*]}
 	do
 		echo -e "listIdUser[${i}] : ${currentIdUser}"
+
+		###################################
+		# Filtrage selon la date de début #
+		# et la date de fin               #
+		###################################
+		date=`cut -d " " -f1 ${fileLog}`
+		newFormatDate=`echo $date | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
+		newFormatDateStart=`echo $dateStart | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\1\2/'`
+		newFormatDateEnd=`echo $dateEnd | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
+		if [[ "$newFormatDate" < "$newFormatDateStart" || "$newFormatDate" > "$newFormatDateEnd" ]]; then
+			break
+		fi
+		
 		#########################
 		# Filtrage selon l'user #
 		#########################
@@ -175,42 +190,89 @@ function generateReport {
 		sed -i -e "s/__CURRENT_USER__/${currentUserName} (id: ${currentIdUser})/" ${tex_multipleUsers}
 		grep ";${currentIdUser};${currentUserName};" ${fileLog} > ${tmp_fileCurrentUser}
 		
-		###################################
-		# Filtrage selon la date de début #
-		# et la date de fin               #
-		###################################
-		# TODO : 
+		#############
+		# getOneLog #
+		#############
+		nbFtp=0
+		nbHttp=0
+		nbEchec=0
+		nbReussite=0
+		codeTex_RapatriementsReussis=" "
+		codeTex_RapatriementsEchoues=" "
+      
+		while IFS=";" read date idUser lastNameUser firstNameUser mailUser destRepatriation protoc sourceRepatriation idStatus status taille
+		do
+			destRepatriation=`echo "$destRepatriation" | sed 's.\/.\\\\/.g' | sed 's.\_.\\\\\\\\_.g' `
+			sourceRepatriation=`echo "$sourceRepatriation" | sed 's.\/.\\\\/.g' | sed 's.\_.\\\\\\\\_.g' `
+			date=`echo $date | cut -d" " -f1`
+			echo -e "\n\
+				Date : $date\n\
+				idUser :\t $idUser\n\
+				lastNameUser :\t $lastNameUser\n\
+				firstNameUser :\t $firstNameUser\n\
+				mailUser :\t $mailUser\n\
+				destRepatriation :\t $destRepatriation\n\
+				protoc :\t $protoc\n\
+				sourceRepatriation :\t $sourceRepatriation\n\
+				idStatus :\t $idStatus\n\
+				status :\t $status\n\
+				taille :\t $taille\n\n"
+				
+			if [[ "$protoc" == "ftp" ]]; then
+				nbFtp=$((nbFtp+1))
+				nbFtpTotal=$((nbFtpTotal+1))
+			elif [[ "$protoc" == "http" ]]; then
+				nbHttp=$((nbHttp+1))
+				nbHttpTotal=$((nbHttpTotal+1))
+			fi
+			
+			if [[ $status =~ "réussie" ]]; then
+				nbReussite=$((nbReussite+1))
+				nbReussiteTotal=$((nbReussiteTotal+1))
+				codeTex_RapatriementsReussis=" ${codeTex_RapatriementsReussis} $date \& $sourceRepatriation \& $destRepatriation \& $taille \\\\\\\\ "
+			else
+				nbEchec=$((nbEchec+1))
+				nbEchecTotal=$((nbEchecTotal+1))
+				codeTex_RapatriementsEchoues=" ${codeTex_RapatriementsEchoues} $date \& $sourceRepatriation \& $status \\\\\\\\ "
+			fi
+		done < ${tmp_fileCurrentUser}
 		
 		###################
-		# Graph. protocol #
+		# Graph. protocol FOR ONE USER #
 		###################
-		#listProtocol=`cut -f7 -d";" ${tmp_fileCurrentUser} | cut -f1 -d":" | sort | uniq`
+		echo "nbFtp : $nbFtp"
+		echo "nbHttp : $nbHttp"
+		sed -i "s@TO-SUBSTITUTE-PROTOCOL@${nbFtp}\/ftp, ${nbHttp}\/http@" ${tex_multipleUsers}
 		
 		########################
-		# Tab. Repatriation OK #
+		# Graph. FAILL/SUCCESS FOR ONE USER #
 		########################
-		echo "Liste de rapatriements réussis"
-		listRepatrOK=`cat ${tmp_fileCurrentUser} | cut -d ";" -f 8 | grep "0:Téléchargement réussie" | sort | uniq -c`
-		codeTex_RapatriementsReussis=""
-		#TODO:
-		#for repatr in ${listRepatrOK[*]};	do
-			codeTex_RapatriementsReussis=`echo "toto \& tata \& tutu \& titi " `
-			echo $codeTex_RapatriementsReussis
-		#done
-		sed -i -e "s/__LIST_REPATR_OK__/${codeTex_RapatriementsReussis}/" ${tex_multipleUsers}
+		nbTentativesUser=$((nbEchec+nbReussite))
+		echo "nbTentativesUser : $nbTentativesUser"
+		echo "nbReussite : $nbReussite"
+		echo "nbEchec : $nbEchec"
+		sed -i "s@TO-SUBSTITUTE-NB-TOTAL-DL@${nbTentativesUser}@" ${tex_multipleUsers}
+		sed -i "s@TO-SUBSTITUTE-FAIL-SUCCESS@${nbReussite}\/SUCCESS, ${nbEchec}\/FAIL@" ${tex_multipleUsers}
 		
 		########################
-		# Tab. Repatriation KO #
+		# Tab. Repatriation OK FOR ONE USER #
 		########################
-		echo "Liste de rapatriements échoués"
-		listRepatrKO=`cat ${tmp_fileCurrentUser} | cut -d ";" -f 8 | grep "0:Fichier distant pas plus récent que le fichier local" | sort | uniq -c`
-		codeTex_RapatriementsEchoues=""
-		#TODO:
-		#for repatr in ${listRepatrKO[*]};	do
-			codeTex_RapatriementsEchoues=`echo "toto \& tata \& tutu " `
-			echo $ codeTex_RapatriementsEchoues
-		#done
-		sed -i -e "s/__LIST_REPATR_KO__/${codeTex_RapatriementsEchoues}/" ${tex_multipleUsers}
+		if [ "$nbReussite" -ge "1" ]
+		then
+			sed -i "s@TO-SUBSTITUTE-LIST-SUCCESS@${codeTex_RapatriementsReussis}@" ${tex_multipleUsers}
+		else
+			sed -i "s@TO-SUBSTITUTE-LIST-SUCCESS@\\\multicolumn{4}{|c|}{Aucun rappatriements réussis trouvés} \\\\\\\\@" ${tex_multipleUsers}
+		fi
+		
+		########################
+		# Tab. Repatriation KO FOR ONE USER#
+		########################
+		if [ "$nbEchec" -ge "1" ]
+		then
+			sed -i "s@TO-SUBSTITUTE-LIST-FAIL@${codeTex_RapatriementsEchoues}@" ${tex_multipleUsers}
+		else
+			sed -i "s@TO-SUBSTITUTE-LIST-FAIL@\\\multicolumn{3}{|c|}{Aucun rappatriements échoués trouvés} \\\\\\\\@" ${tex_multipleUsers}
+		fi
 		
 		chmod 777 ${tex_multipleUsers}
 
@@ -224,14 +286,34 @@ function generateReport {
 	echo "tex_finalResults = $tex_finalResults"
 	cat ${tex_modelStart} >> ${tex_finalResults}
 	chmod 777 ${tex_finalResults}
-	
-	####################################
-	# Using tex_modelSummaryForALLuser #
-	####################################
-	if [[ "$userName" == "ALL" ]]; then
-		cat ${tex_modelSummaryForALLuser} >> ${tex_finalResults}
-		chmod 777 ${tex_finalResults}
-		#TODO: sed ....
+	sed -i "s@TO-SUBSTITUTE-NAME-USER@${userName}@" ${tex_finalResults}
+	sed -i "s@TO-SUBSTITUTE-DATE-START@${dateStart}@" ${tex_finalResults}
+	sed -i "s@TO-SUBSTITUTE-DATE-END@${dateEnd}@" ${tex_finalResults}
+
+
+	if [ "$i" -eq "0" ]; then
+		sed -i "s@\\\\tableofcontents@@" ${tex_finalResults}
+		echo "Aucun log trouvé correspondant à vos critères de recherche" >> ${tex_finalResults}
+	else
+		####################################
+		# Using tex_modelSummaryForALLuser #
+		####################################
+		if [[ "$userName" == "ALL" ]]; then
+			cat ${tex_modelSummaryForALLuser} >> ${tex_finalResults}
+			chmod 777 ${tex_finalResults}
+		
+			###################
+			# Graph. protocol FOR ALL USERS #
+			###################
+			sed -i "s@TO-SUBSTITUTE-PROTOCOL-ALL@${nbFtpTotal}\/ftp, ${nbHttpTotal}\/http@" ${tex_finalResults}
+		
+			########################
+			# Graph. FAILL/SUCCESS FOR ALL USERS #
+			########################
+			nbTentativesTotales=$((nbEchecTotal+nbReussiteTotal))
+			sed -i "s@TO-SUBSTITUTE-NB-TOTAL-DL@${nbTentativesTotales}@" ${tex_finalResults}
+			sed -i "s@TO-SUBSTITUTE-FAIL-SUCCESS@${nbReussiteTotal}\/SUCCESS, ${nbEchecTotal}\/FAIL@" ${tex_finalResults}
+		fi
 	fi
 	
 	###########################
@@ -246,6 +328,7 @@ function generateReport {
 	# Generation du fichier PDF #
 	#############################
 	pdflatex ${tex_finalResults}
+	pdflatex ${tex_finalResults}
 	
 	####################
 	# Delete tmp files #
@@ -253,7 +336,7 @@ function generateReport {
 	mv ${file_finalResults}.pdf ${dir_report}
 	mv ${tex_finalResults} ${dir_report}
 	rm -rf ${dir_tmpReport}
-	rm -f ${file_finalResults}.log ${file_finalResults}.aux
+	rm -f ${file_finalResults}.*
 }
 
 # Perform the repatriation
@@ -377,7 +460,7 @@ function checkLastFile {
 #  - Server issued an error response (Répertoire ou Fichier source inexistant)
 #  - Others errors
 # Format of one log :
-# $date;$idUser;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$sourceRepatriation;$idStatus:$status:$taille
+# $date;$idUser;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$protoc;$sourceRepatriation;$idStatus;$status;$taille
 function setLogFromWget {
 	echo "setLog function called"
 	local idUser=$1
@@ -388,6 +471,7 @@ function setLogFromWget {
 	local sourceRepatriation=$6
 	local status=$7
 	local remoteFilesRepatriation=$8
+	local protoc=`echo $sourceRepatriation | cut -d: -f1 `
 	
 	echo -e "\t idUser : $idUser"
 	echo -e "\t lastNameUser : $lastNameUser"
@@ -395,6 +479,7 @@ function setLogFromWget {
 	echo -e "\t mailUser : $mailUser"
 	echo -e "\t destRepatriation : $destRepatriation"
 	echo -e "\t sourceRepatriation : $sourceRepatriation"
+	echo -e "\t protoc : $protoc"
 	echo -e "\t remoteFilesRepatriation : $remoteFilesRepatriation"
 	echo -e "\t status : $status"
 
@@ -410,56 +495,56 @@ function setLogFromWget {
 				if [[ ! -z `echo ${wgetLog} | grep "enregistré"` ]]
 				then
 					echo "Status : 0 (No problems occurred)"
-					RES="0:Téléchargement réussie:${taille}"
+					RES="0;Téléchargement réussie;${taille}"
 				elif [[ ! -z `echo ${wgetLog} | grep "pas plus récent que le fichier local"` ]]
 				then
 					echo "Status : 0 (No problems occurred) but Fichier distant pas plus récent que le fichier local"
-					RES="0:Fichier distant pas plus récent que le fichier local:0"
+					RES="0;Fichier distant pas plus récent que le fichier local;0"
 				fi
 				;;
 			# Generic error code :
 			"1")
 				echo "Status : 1 (Generic error code)"
-				RES="1:Generic error code:0"
+				RES="1;Generic error code;0"
 				;;
 			# Parse error—for instance :
 			"2")
 				echo "Status : 2 (Parse error—for instance, when parsing command-line options, the ‘.wgetrc’ or ‘.netrc’...)"
-				RES="2:Parse error—for instance:0"
+				RES="2;Parse error—for instance;0"
 				;;
 			# File I/O error :
 			"3")
 				echo "Status : 3 (File I/O error)"
-				RES="3:File I/O error:0"
+				RES="3;File I/O error;0"
 				;;
 			# Network failure :
 			"4")
 				echo "Status : 4 (Network failure)"
-				RES="4:Network failure:0"
+				RES="4;Network failure;0"
 				;;
 			# SSL verification failure :
 			"5")
 				echo "Status : 5 (SSL verification failure)"
-				RES="5:SSL verification failure:0"
+				RES="5;SSL verification failure;0"
 				;;
 			# Username/password authentication failure :
 			"6")
 				echo "Status : 6 (Username/password authentication failure)"
-				RES="6:Username/password authentication failure:0"
+				RES="6;Username/password authentication failure;0"
 				;;
 			# Protocol errors :
 			"7")
 				echo "Status : 7 (Protocol errors)"
-				RES="7:Protocol errors:0"
+				RES="7;Protocol errors;0"
 				;;
 			# Server issued an error response
 			"8")
 				echo "Status : 8 (Server issued an error response). Répertoire ou Fichier source inexistant"
-				RES="8:Server issued an error response (Répertoire ou Fichier source inexistant):0"
+				RES="8;Server issued an error response (Répertoire ou Fichier source inexistant);0"
 				;;
 			*)
 				echo "Status : > 8 (Others errors)"
-				RES="9:Others errors:0"
+				RES="9;Others errors;0"
 				;;
 		esac
 	else
@@ -467,7 +552,7 @@ function setLogFromWget {
 	fi
 
 	date=`date "+%d-%m-%Y %H:%M:%S"`
-	echo "$date;$idUser;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$sourceRepatriation;$RES" >> ${fileLog}
+	echo "$date;$idUser;$lastNameUser;$firstNameUser;$mailUser;$destRepatriation;$protoc;$sourceRepatriation;$RES" >> ${fileLog}
 }
 
 
