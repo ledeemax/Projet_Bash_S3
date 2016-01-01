@@ -134,11 +134,34 @@ function generateReport {
 	########
 	# Init #
 	########
-		
 	mkdir ${dir_tmpReport}
 	cp ${dir_modelReport}/${typeReport}/* ${dir_tmpReport}/
 	mkdir -p ~/texmf/tex/latex/local/
 	cp ${dir_tmpReport}/pgf-pie.sty ~/texmf/tex/latex/local/
+	
+	###################################
+	# Filtrage selon la date de début #
+	# et la date de fin               #
+	###################################
+	tmp_fileDateFilter=${dir_tmpReport}/dateFiltre.tmp
+	while read ligne
+	do
+		dateJMY=`echo ${ligne} | cut -d " " -f1 `
+		newFormatDate=`echo $dateJMY | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
+		newFormatDateStart=`echo $dateStart | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
+		newFormatDateEnd=`echo $dateEnd | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
+		echo -e "\n newFormatDate : $newFormatDate"
+		echo -e "newFormatDateStart : $newFormatDateStart"
+		echo -e "newFormatDateEnd : $newFormatDateEnd"
+		if [[ "$newFormatDate" -gt "$newFormatDateStart" && "$newFormatDate" -lt "$newFormatDateEnd" ]]; then
+			echo "${ligne}" >> ${tmp_fileDateFilter}
+		fi
+	done < ${fileLog}
+	echo "tmp_fileDateFilter : $tmp_fileDateFilter"
+	
+	########
+	# Init #
+	########
 	tex_modelStart="${dir_tmpReport}/model_start.tex"
 	tex_modelSummaryForALLuser="${dir_tmpReport}/model_summaryForALLuser.tex"
 	tex_modelOneUser="${dir_tmpReport}/model_oneUser.tex"
@@ -146,15 +169,20 @@ function generateReport {
 	tex_multipleUsers="${dir_tmpReport}/multipleUsers.tex"	
 	userName=`exec ${scriptGestionUsers} --get-name ${listIdUser} | tail -n 1`  # Appel fonction située dans un autre script
 	if [[ "$listIdUser" == "ALL" ]]; then
-		listIdUser=`cut -f2 -d";" ${fileLog} | sort | uniq`
+		listIdUser=`cut -f2 -d";" ${tmp_fileDateFilter} | sort | uniq`
 		userName="ALL"
+	elif [ -z `cut -f2 -d";" ${tmp_fileDateFilter} | grep ${listIdUser} | uniq ` ]; then
+		listIdUser=""
 	fi
 	tex_finalResults="${dir_tmpReport}/${userName}_${dateStart}_${dateEnd}.tex"
 	file_finalResults="${userName}_${dateStart}_${dateEnd}"
-	if [ -f ${dir_report}/${tex_finalResults}.pdf ]; then     # très improbable mais bon  :D
+	if [ -f ${dir_report}/${tex_finalResults}.pdf ]; then     # improbable mais bon  :D
 		echo "Le fichier existe déjà."
 		break
 	fi
+
+	echo -e "\n\t\t listIdUser : $listIdUser \n\n"
+
 	
 	######################################################
 	# Parcours list users :                              #
@@ -164,21 +192,17 @@ function generateReport {
 	# Using tex_multipleUsers file #
 	################################
 	i=0
+	nbFtpTotal=0
+	nbHttpTotal=0
+	nbEchecTotal=0
+	nbReussiteTotal=0
 	for currentIdUser in ${listIdUser[*]}
 	do
 		echo -e "listIdUser[${i}] : ${currentIdUser}"
 
-		###################################
-		# Filtrage selon la date de début #
-		# et la date de fin               #
-		###################################
-		date=`cut -d " " -f1 ${fileLog}`
-		newFormatDate=`echo $date | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
-		newFormatDateStart=`echo $dateStart | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\1\2/'`
-		newFormatDateEnd=`echo $dateEnd | sed 's/\(.*\)-\(.*\)-\(.*\)/\3\2\1/'`
-		if [[ "$newFormatDate" < "$newFormatDateStart" || "$newFormatDate" > "$newFormatDateEnd" ]]; then
-			break
-		fi
+		#if [ -f $tmp_fileDateFilter ]; then
+		#	break;
+		#fi
 		
 		#########################
 		# Filtrage selon l'user #
@@ -188,7 +212,7 @@ function generateReport {
 		tmp_fileCurrentUser=${dir_tmpReport}/${currentIdUser}.tmp
 		cat ${tex_modelOneUser} >> ${tex_multipleUsers}
 		sed -i -e "s/__CURRENT_USER__/${currentUserName} (id: ${currentIdUser})/" ${tex_multipleUsers}
-		grep ";${currentIdUser};${currentUserName};" ${fileLog} > ${tmp_fileCurrentUser}
+		grep ";${currentIdUser};${currentUserName};" ${tmp_fileDateFilter} > ${tmp_fileCurrentUser}
 		
 		#############
 		# getOneLog #
@@ -278,7 +302,7 @@ function generateReport {
 
 		i=$((i+1))
 	done
-	echo "$i idUser(s) distinct(s) in log file (${fileLog})"
+	echo "$i idUser(s) distinct(s) trouvés in log file (${fileLog}) durant la date de début et de fin"
 	
 	########################
 	# Using tex_modelStart #
@@ -305,12 +329,16 @@ function generateReport {
 			###################
 			# Graph. protocol FOR ALL USERS #
 			###################
+			echo "nbFtpTotal : $nbFtpTotal"
+			echo "nbHttpTotal : $nbHttpTotal"
 			sed -i "s@TO-SUBSTITUTE-PROTOCOL-ALL@${nbFtpTotal}\/ftp, ${nbHttpTotal}\/http@" ${tex_finalResults}
 		
 			########################
 			# Graph. FAILL/SUCCESS FOR ALL USERS #
 			########################
 			nbTentativesTotales=$((nbEchecTotal+nbReussiteTotal))
+			echo "nbReussiteTotal : $nbReussiteTotal"
+			echo "nbEchecTotal : $nbEchecTotal"
 			sed -i "s@TO-SUBSTITUTE-NB-TOTAL-DL@${nbTentativesTotales}@" ${tex_finalResults}
 			sed -i "s@TO-SUBSTITUTE-FAIL-SUCCESS@${nbReussiteTotal}\/SUCCESS, ${nbEchecTotal}\/FAIL@" ${tex_finalResults}
 		fi
@@ -335,7 +363,7 @@ function generateReport {
 	####################
 	mv ${file_finalResults}.pdf ${dir_report}
 	mv ${tex_finalResults} ${dir_report}
-	rm -rf ${dir_tmpReport}
+	#rm -rf ${dir_tmpReport}
 	rm -f ${file_finalResults}.*
 }
 
