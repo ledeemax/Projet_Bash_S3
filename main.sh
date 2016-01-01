@@ -363,7 +363,7 @@ function generateReport {
 	####################
 	mv ${file_finalResults}.pdf ${dir_report}
 	mv ${tex_finalResults} ${dir_report}
-	#rm -rf ${dir_tmpReport}
+	rm -rf ${dir_tmpReport}
 	rm -f ${file_finalResults}.*
 }
 
