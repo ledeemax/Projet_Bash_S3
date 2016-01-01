@@ -5,20 +5,36 @@
 %----------------------------------------------------------------------------------------
 
 \section{Résumé des rapatriements : __CURRENT_USER__}
+  \subsection{Protocol}
+    \begin{tikzpicture}
+      \pie[text=legend, sum=auto, radius=1]{TO-SUBSTITUTE-PROTOCOL}
+    \end{tikzpicture}
+
+  \subsection{Nombre total de tentatives de rapatriements : TO-SUBSTITUTE-NB-TOTAL-DL}
+    \begin{tikzpicture}
+      \pie[text=legend, sum=auto, radius=1]{TO-SUBSTITUTE-FAIL-SUCCESS}
+    \end{tikzpicture}
+    
   \subsection{Liste des rapatriements réussis}
-    \begin{tabular}{|c|c|c|c|}
-      \hline
-      Date & Source & Destination & Taille \\
-      \hline
-      __LIST_REPATR_OK__ \\
-      \hline
-    \end{tabular}
+    \scalebox{0.7}
+    {
+      \begin{tabular}{|c|c|c|c|}
+        \hline
+        Date & Source & Destination & Taille (byte) \\
+        \hline
+        TO-SUBSTITUTE-LIST-SUCCESS
+        \hline
+      \end{tabular}
+    }
 
   \subsection{Liste des rapatriements échoués}
-    \begin{tabular}{|c|c|c|}
-      \hline
-      Date & Source & Code error \\
-      \hline
-      __LIST_REPATR_KO__ \\
-      \hline
-    \end{tabular}
+    \scalebox{0.7}
+    {
+      \begin{tabular}{|c|c|c|}
+        \hline
+        Date & Source & Code error  \\
+        \hline
+        TO-SUBSTITUTE-LIST-FAIL
+        \hline
+      \end{tabular}
+    }
